@@ -21,8 +21,11 @@ $ npm run %script_name%
 
 NodeEntry accepts arguments:
 
-* --src (-s) path to source json file
+* --src (-s)
+  * path to source json file
+  * default to `input.json`
 * --output (-o) path to output java file
+  * default to `${argument_src}.java`
 
 try run uncompiled .ts files directly
 ```shell
