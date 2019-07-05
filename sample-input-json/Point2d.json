@@ -1,0 +1,137 @@
+{
+  "reference": "https://www.cs.uic.edu/~sloan/CLASSES/java/Point2d.java",
+  "mainClass": {
+    "name": "Point2d",
+    "attributes": [
+      { "accessModifier": "private", "type": "double", "name": "x" },
+      { "accessModifier": "private", "type": "double", "name": "y" },
+      { "accessModifier": "private", "type": "boolean", "name": "debug" }
+    ],
+    "constructors": [
+      {
+        "accessModifier": "public",
+        "arguments": [
+          { "type": "double", "name": "px" },
+          { "type": "double", "name": "py" }
+        ],
+        "statements": [
+          "x = px;",
+          "y = py;",
+          "",
+          "debug = false;"
+        ]
+      },
+      {
+        "accessModifier": "public",
+        "statements": [ "this(0.0, 0.0);" ]
+      },
+      {
+        "accessModifier": "public",
+        "arguments": [ { "type": "Point2d", "name": "pt" } ],
+        "statements": [
+          "x = pt.getX();",
+          "y = pt.getY();"
+        ]
+      }
+    ],
+    "methods": [
+      {
+        "accessModifier": "public",
+        "name": "dprint",
+        "arguments": [ { "type": "String", "name": "s" } ],
+        "statements": [
+          "if (debug)",
+          [ "System.out.println(\"Debug: \" + s);" ]
+        ]
+      },
+      {
+        "accessModifier": "public",
+        "name": "setDebug",
+        "arguments": [ { "type": "boolean", "name": "b" } ],
+        "statements": [ "debug = b;" ]
+      },
+      {
+        "accessModifier": "public",
+        "name": "setX",
+        "arguments": [ { "type": "double", "name": "px" } ],
+        "statements": [
+          "dprint (\"setX(): Changing value of X from \" + x + \" to \" + px );",
+          "x = px;"
+        ]
+      },
+      {
+        "accessModifier": "public",
+        "type": "double",
+        "name": "getX",
+        "statements": [ "return x;" ]
+      },
+      {
+        "accessModifier": "public",
+        "name": "setY",
+        "arguments": [ { "type": "double", "name": "py" } ],
+        "statements": [
+          "dprint (\"setY(): Changing value of Y from \" + y + \" to \" + py );",
+          "y = py;"
+        ]
+      },
+      {
+        "accessModifier": "public",
+        "type": "double",
+        "name": "getY",
+        "statements": [ "return y;" ]
+      },
+      {
+        "accessModifier": "public",
+        "name": "setXY",
+        "arguments": [
+          { "type": "double", "name": "px" },
+          { "type": "double", "name": "py" }
+        ],
+        "statements": [
+          "setX(px);",
+          "setY(py);"
+        ]
+      },
+      {
+        "accessModifier": "public",
+        "type": "double",
+        "name": "distanceFrom",
+        "arguments": [ { "type": "Point2d", "name": "pt" } ],
+        "statements": [
+          "double dx = Math.abs(x - pt.getX());",
+          "double dy = Math.abs(y - pt.getY());",
+          "",
+          "// check out the use of dprint()",
+          "dprint (\"distanceFrom(): deltaX = \" + dx);",
+          "dprint (\"distanceFrom(): deltaY = \" + dy);",
+          "",
+          "return Math.sqrt((dx * dx) + (dy * dy));"
+        ]
+      },
+      {
+        "accessModifier": "public",
+        "type": "double",
+        "name": "distanceFromOrigin",
+        "statements": [ "return distanceFrom (new Point2d ( ));" ]
+      },
+      {
+        "accessModifier": "public",
+        "type": "String",
+        "name": "toStringForXY",
+        "statements": [
+          "String str = \"(\" + x + \", \" + y;",
+          "return str;"
+        ]
+      },
+      {
+        "accessModifier": "public",
+        "type": "String",
+        "name": "toString",
+        "statements": [
+          "String str = toStringForXY() + \")\";",
+          "return str;"
+        ]
+      }
+    ]
+  }
+}

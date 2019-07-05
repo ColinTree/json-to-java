@@ -1,0 +1,28 @@
+{
+  "name": "json-to-java",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/NodeEntry.ts",
+    "start": "node ."
+  },
+  "main": "bin/NodeEntry.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ColinTree/json-to-java"
+  },
+  "author": "ColinTree",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "command-line-args": "^5.1.1",
+    "fs-extra": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/command-line-args": "^5.0.0",
+    "@types/fs-extra": "^8.0.0",
+    "ts-node": "^8.3.0",
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.2"
+  }
+}

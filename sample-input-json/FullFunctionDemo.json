@@ -1,0 +1,86 @@
+{
+  "indentationSize": 2,
+  "package": "_package.is.optional",
+  "imports": [
+    "java.io.*",
+    "java.util.List",
+    "java.util.ArrayList"
+  ],
+  "mainClass": {
+    "annotations": [
+      { "name": "MarkerAnnotation" },
+      { "name": "SingleValueAnnotation", "values": "\"unused\"" },
+      {
+        "name": "FullAnnotation",
+        "values": {
+          "value1": "1",
+          "value2": "\"String\""
+        }
+      }
+    ],
+    "accessModifier": "public",
+    "nonAccessModifiers": [ "final" ],
+    "name": "FullFunctionDemo",
+    "extends": "SuperClass",
+    "implements": [ "Interface1", "Interface2" ],
+    "attributes": [
+      { "type": "String", "name": "string" },
+      { "accessModifier": "private", "type": "int", "name": "privateInt" },
+      {
+        "accessModifier": "private",
+        "type": "int",
+        "name": "privateIntWithValue",
+        "value": "1"
+      },
+      {
+        "accessModifier": "public",
+        "nonAccessModifiers": [ "final", "static" ],
+        "type": "List<String>",
+        "name": "publicFinalStaticList"
+      }
+    ],
+    "constructors": [
+      {
+        "statements": [
+          "// constructor with no access modifier"
+        ]
+      },
+      {
+        "accessModifier": "public",
+        "arguments": [
+          { "type": "String", "name": "arg1" },
+          { "type": "int", "name": "arg2" }
+        ],
+        "statements": [ "// constructor with accessModifier & arguments" ]
+      }
+    ],
+    "methods": [
+      { "name": "emptyMethod" },
+      {
+        "annotations": [ { "name": "Deprecated" } ],
+        "accessModifier": "public",
+        "nonAccessModifiers": [ "final", "static" ],
+        "type": "boolean",
+        "name": "fullFunctionMethod",
+        "arguments": [
+          { "type": "String", "name": "arg1" },
+          { "type": "String", "name": "arg2" }
+        ],
+        "statements": [
+          "if (arg1.equals(arg2)) {",
+          [ "return true;" ],
+          "} else {",
+          [ "return false;" ],
+          "}"
+        ]
+      }
+    ],
+    "classes": [
+      { "name": "InnerClass" }
+    ]
+  },
+  "otherClasses": [
+    { "name": "OuterClass1" },
+    { "name": "OuterClass2" }
+  ]
+}

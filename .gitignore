@@ -1,0 +1,8 @@
+.vscode
+node_modules
+bin
+
+# sometimes we may need some testing json
+*input*.json
+# default output files
+*.json.java
