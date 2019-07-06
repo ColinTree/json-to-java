@@ -1,19 +1,27 @@
 {
   "name": "json-to-java",
   "version": "1.0.2",
-  "description": "",
+  "description": "node module converting formatted json into java files",
   "scripts": {
-    "prepublish": "npm run build",
-    "build": "tsc",
-    "dev": "ts-node src/NodeEntry.ts",
-    "start": "node ."
+    "prepare": "npm run rebuild",
+    "build": "tsc -p .",
+    "rebuild": "npm run clean && npm run build",
+    "clean": "rm -rf dist",
+    "dev": "ts-node src/NodeEntry.ts"
   },
-  "main": "bin/NodeEntry.js",
+  "bin": {
+    "json-to-java": "./cli.js"
+  },
+  "main": "bin/index.js",
   "types": "bin/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/ColinTree/json-to-java"
   },
+  "bugs": {
+    "url": "https://github.com/ColinTree/json-to-java/issues"
+  },
+  "homepage": "https://github.com/ColinTree/json-to-java#readme",
   "author": "colintree",
   "license": "Apache-2.0",
   "dependencies": {
