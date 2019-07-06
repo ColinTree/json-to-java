@@ -25,7 +25,10 @@ export default class JavaSingleFile implements JavaConvertable {
         return importElement;
       }));
     }
-    if ('mainClass' in json && typeof json.mainClass === 'object' && !Array.isArray(json.mainClass)) {
+    if ('mainClass' in json &&
+        typeof json.mainClass === 'object' &&
+        !Array.isArray(json.mainClass) &&
+        json.mainClass !== null) {
       this.mainClass = new JavaClass(json.mainClass);
     }
     if ('otherClasses' in json && Array.isArray(json.otherClasses)) {

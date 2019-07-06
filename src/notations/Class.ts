@@ -33,7 +33,7 @@ export default class JavaClass implements JavaConvertable {
     const err = (message: string) => new Error(`[Class ${this.name}] ${message}`);
     if ('annotations' in json && Array.isArray(json.annotations)) {
       this.annotations.push(...json.annotations.map(annotation => {
-        if (typeof annotation !== 'object' || Array.isArray(annotation)) {
+        if (typeof annotation !== 'object' || Array.isArray(annotation) || annotation === null) {
           throw err('Anontation should be a pure object array');
         }
         try {
