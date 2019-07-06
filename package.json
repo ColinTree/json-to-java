@@ -1,6 +1,6 @@
 {
   "name": "json-to-java",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "scripts": {
     "build": "tsc",
@@ -8,6 +8,7 @@
     "start": "node ."
   },
   "main": "bin/NodeEntry.js",
+  "types": "bin/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/ColinTree/json-to-java"
