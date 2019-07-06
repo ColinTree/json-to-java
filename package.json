@@ -1,6 +1,6 @@
 {
   "name": "json-to-java",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "scripts": {
     "build": "tsc",
@@ -12,7 +12,7 @@
     "type": "git",
     "url": "https://github.com/ColinTree/json-to-java"
   },
-  "author": "ColinTree",
+  "author": "colintree",
   "license": "Apache-2.0",
   "dependencies": {
     "command-line-args": "^5.1.1",
