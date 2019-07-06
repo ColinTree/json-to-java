@@ -6,3 +6,5 @@ src
 .npmignore
 tslint.json
 tsconfig.json
+*input*.json
+*.json.java
