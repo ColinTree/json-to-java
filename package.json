@@ -1,6 +1,6 @@
 {
   "name": "json-to-java",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "node module converting formatted json into java files",
   "scripts": {
     "prepare": "npm run rebuild",
