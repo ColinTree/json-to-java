@@ -9,7 +9,6 @@
     ]
   },
   "rules": {
-    "forin": false,
     "space-before-function-paren": true,
     "arrow-parens": false,
     "quotemark": [true, "single"],

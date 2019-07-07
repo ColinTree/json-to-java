@@ -1,60 +1,52 @@
 import { JsonObject } from '../../utils/json';
-import JavaConvertable from '../basic/JavaConvertable';
+import JavaBaseWithName from '../BaseWithName';
 import { isJavaAccessModifier, JavaAccessModifier } from '../basic/Modifier';
 import JavaStatementArray, { JavaStatementToString } from '../basic/Statement';
 import JavaVariableDifinition from '../basic/VariableDifinition';
+import { ConvertOptions } from '../SingleFile';
 
-export default class JavaClassConstructor implements JavaConvertable {
+export default class JavaClassConstructor extends JavaBaseWithName {
   public accessModifier: JavaAccessModifier = null;
-  public name: string = '';
   public arguments: JavaVariableDifinition[] = [];
   public statements: JavaStatementArray = [];
 
-  public constructor (className: string, json: JsonObject) {
-    this.name = className;
+  public constructor (convertOptions: ConvertOptions, currentIndent: number, className: string, json: JsonObject) {
+    super(convertOptions, currentIndent, className);
+
     if ('accessModifier' in json) {
       if (json.accessModifier !== null && typeof json.accessModifier !== 'string') {
-        throw new Error(`accessModifier '${json.accessModifier}' connot be accepted`);
+        throw this.err(`accessModifier '${json.accessModifier}' connot be accepted`);
       }
       if (!isJavaAccessModifier(json.accessModifier)) {
-        throw new Error(`accessModifier '${json.accessModifier}' connot be accepted`);
+        throw this.err(`accessModifier '${json.accessModifier}' connot be accepted`);
       }
       this.accessModifier = json.accessModifier as JavaAccessModifier;
     }
     if ('arguments' in json && Array.isArray(json.arguments)) {
       this.arguments.push(...json.arguments.map(argument => {
         if (typeof argument !== 'object' && Array.isArray(argument)) {
-          throw new Error('arguments should be a object array');
+          throw this.err('arguments should be a object array');
         }
         try {
-          return new JavaVariableDifinition(argument as JsonObject);
+          return new JavaVariableDifinition(convertOptions, currentIndent, argument as JsonObject);
         } catch (e) {
-          throw new Error((e as Error).message);
+          throw this.err((e as Error).message);
         }
       }));
     }
     if ('statements' in json && Array.isArray(json.statements)) {
-      // TODO: check this
+      // TODO: check statements
       this.statements.push(...json.statements as JavaStatementArray);
     }
   }
 
-  public toJava (indentationSize: number, currentIndent: number) {
-    const selfIndentation = ' '.repeat(currentIndent);
-    let result = `\n${selfIndentation}`;
-    if (this.accessModifier !== null) {
-      result += `${this.accessModifier} `;
-    }
-    result += `${this.name} (`;
-    this.arguments.forEach(argument => {
-      if (argument.value !== null) {
-        throw new Error('Argument of constructor should not have an value defined');
-      }
-    });
-    result += this.arguments.map(argument => argument.toJava()).join(', ');
-    result += ') {';
-    result += JavaStatementToString(this.statements, indentationSize, currentIndent + indentationSize);
-    result += `\n${selfIndentation}}`;
-    return result;
+  public toString () {
+    return '' +
+      `\n${this.currentIndentString}` +
+      (this.accessModifier ? `${this.accessModifier} ` : '') +
+      `${this.name} ` +
+      `(${this.arguments.join(', ')}) {` +
+      JavaStatementToString(this.statements, depth => this.contentIndentString(depth)) +
+      `\n${this.currentIndentString}}`;
   }
 }

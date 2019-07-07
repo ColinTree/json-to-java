@@ -1,5 +1,7 @@
 {
-  "indentationSize": 2,
+  "convertOptions": {
+    "indentationSize": "tab"
+  },
   "package": "_package.is.optional",
   "imports": [
     "java.io.*",

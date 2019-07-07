@@ -5,5 +5,5 @@ export default function JsonToJava (json: string | JsonObject): string {
   if (typeof json === 'string') {
     json = JSON.parse(json) as JsonObject;
   }
-  return new JavaSingleFile(json).toJava();
+  return new JavaSingleFile(json).toString();
 }

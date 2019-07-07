@@ -1,18 +1,48 @@
-import { JsonObject } from '../utils/json';
-import JavaConvertable from './basic/JavaConvertable';
+import { JsonObject, JsonUtil } from '../utils/json';
 import JavaClass from './Class';
 
-export default class JavaSingleFile implements JavaConvertable {
+export interface ConvertOptions {
+  indent: string;
+}
+function defaultConvertOptions (): ConvertOptions {
+  return { indent: '    ' };
+}
 
-  public indentationSize: number = 4;
-  public package: string = '';
-  public imports: string[] = [];
-  public mainClass: JavaClass = {} as JavaClass;
-  public otherClasses: JavaClass[] = [];
+export default class JavaSingleFile {
+
+  public readonly convertOptions: ConvertOptions = defaultConvertOptions();
+
+  public readonly package: string = '';
+  public readonly imports: string[] = [];
+  public readonly mainClass: JavaClass;
+  public readonly otherClasses: JavaClass[] = [];
 
   public constructor (json: JsonObject) {
-    if ('indentationSize' in json && typeof json.indentationSize === 'number') {
-      this.indentationSize = json.indentationSize;
+    if (true) {
+      // TODO: remove this in the future, this is kept as backward compatible
+      if (typeof json.indentationSize !== 'number' && json.indentationSize !== 'tab') {
+        json.indentationSize = 4;
+      }
+      this.convertOptions.indent = json.indentationSize === 'tab' ? '\t' : ' '.repeat(json.indentationSize);
+    }
+    if ('convertOptions' in json &&
+        (typeof json.convertOptions !== 'object' ||
+          Array.isArray(json.convertOptions) ||
+          json.convertOptions === null
+        )) {
+      throw new Error('convertOptions should be a JsonObject');
+    }
+    if ('convertOptions' in json) {
+      const convertOptions = json.convertOptions as JsonObject;
+      if ('indent' in convertOptions) {
+        if (typeof convertOptions.indent === 'number') {
+          this.convertOptions.indent = ' '.repeat(convertOptions.indent);
+        } else if (convertOptions.indent === 'tab') {
+          this.convertOptions.indent = '\t';
+        } else {
+          throw new Error('convertOptions.indent should be a number or string "tab"');
+        }
+      }
     }
     if ('package' in json && typeof json.package === 'string') {
       this.package = json.package;
@@ -25,11 +55,15 @@ export default class JavaSingleFile implements JavaConvertable {
         return importElement;
       }));
     }
-    if ('mainClass' in json &&
-        typeof json.mainClass === 'object' &&
-        !Array.isArray(json.mainClass) &&
-        json.mainClass !== null) {
-      this.mainClass = new JavaClass(json.mainClass);
+    if (!('mainClass' in json) ||
+        typeof json.mainClass !== 'object' ||
+        Array.isArray(json.mainClass) ||
+        json.mainClass === null) {
+      throw new Error('There must be a mainClass defined in a java file');
+    }
+    this.mainClass = new JavaClass(this.convertOptions, 0, json.mainClass);
+    if (![ 'public', null ].includes(this.mainClass.accessModifier)) {
+      throw new Error('MainClass of a java file should have "public" or null for its accessModifier');
     }
     if ('otherClasses' in json && Array.isArray(json.otherClasses)) {
       this.otherClasses.push(...json.otherClasses.map(claz => {
@@ -37,31 +71,21 @@ export default class JavaSingleFile implements JavaConvertable {
           throw new Error('otherClasses should be a object array');
         }
         // TODO: limit modifiers, e.g. private
-        return new JavaClass(claz as JsonObject);
+        return new JavaClass(this.convertOptions, 0, claz as JsonObject);
       }));
     }
   }
 
-  public toJava () {
-    let result = '';
-    if (this.package.length > 0) {
-      result += `package ${this.package};\n`;
-    }
-    this.imports.forEach(importElement => {
-      result += `\nimport ${importElement};`;
-    });
-    if (this.imports.length > 0) {
-      result += '\n';
-    }
-    if (this.mainClass.accessModifier !== 'public' && this.mainClass.accessModifier !== null) {
-      throw new Error('MainClass of a java file should have "public" or null for `accessModifier`');
-    }
-    result += this.mainClass.toJava(this.indentationSize, 0);
-    result += '\n';
-    this.otherClasses.forEach(claz => {
-      result += claz.toJava(this.indentationSize, 0);
-      result += '\n';
-    });
-    return result;
+  public toString () {
+    return '' +
+      (this.package.length > 0 ? `package ${this.package};\n` : '') +
+
+      (this.imports.length > 0
+        ? `\n${this.imports.map(importElement => `import ${importElement};`).join('\n')}\n`
+        : '') +
+
+      `${this.mainClass}\n` +
+
+      this.otherClasses.join('\n') + (this.otherClasses.length > 0 ? '\n' : '');
   }
 }

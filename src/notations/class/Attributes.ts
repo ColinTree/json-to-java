@@ -1,45 +1,37 @@
-import { JAVA_NAME_VALIDTOR } from '../../utils/consts';
 import { JsonObject } from '../../utils/json';
-import JavaConvertable from '../basic/JavaConvertable';
+import JavaBaseWithName from '../BaseWithName';
 import { isJavaAccessModifier, isJavaNonAccessModifier,
   JavaAccessModifier, JavaNonAccessModifier } from '../basic/Modifier';
+import { ConvertOptions } from '../SingleFile';
 
-export default class JavaClassAttribute implements JavaConvertable {
-  public accessModifier: JavaAccessModifier = null;
-  public nonAccessModifiers: JavaNonAccessModifier[] = [];
-  public type: string = '';
-  public name: string = '';
-  public value: string | null = null;
+export default class JavaClassAttribute extends JavaBaseWithName {
+  public readonly accessModifier: JavaAccessModifier = null;
+  public readonly nonAccessModifiers: JavaNonAccessModifier[] = [];
+  public readonly type: string;
+  public readonly value: string | null = null;
 
-  public constructor (json: JsonObject) {
-    if (!('name' in json) || typeof json.name !== 'string') {
-      throw new Error('Attribute should have a name');
-    }
-    this.name = json.name;
-    if (!JAVA_NAME_VALIDTOR.test(this.name)) {
-      throw new Error(`VariableDifinition name invalid: ${this.name}`);
-    }
+  public constructor (convertOptions: ConvertOptions, currentIndent: number, json: JsonObject) {
+    super(convertOptions, currentIndent, json.name);
 
-    const err = (message: string) => new Error(`[Attribute ${this.name}] ${message}`);
     if ('accessModifier' in json) {
       if (json.accessModifier !== null && typeof json.accessModifier !== 'string') {
-        throw err(`accessModifier '${json.accessModifier}' connot be accepted`);
+        throw this.err(`accessModifier '${json.accessModifier}' connot be accepted`);
       }
       if (!isJavaAccessModifier(json.accessModifier)) {
-        throw err(`accessModifier '${json.accessModifier}' connot be accepted`);
+        throw this.err(`accessModifier '${json.accessModifier}' connot be accepted`);
       }
       this.accessModifier = json.accessModifier as JavaAccessModifier;
     }
     if ('nonAccessModifiers' in json && Array.isArray(json.nonAccessModifiers)) {
       this.nonAccessModifiers.push(...json.nonAccessModifiers.map(nonAccessModifier => {
         if (typeof nonAccessModifier !== 'string' || !isJavaNonAccessModifier(nonAccessModifier)) {
-          throw err(`nonAccessModifier '${nonAccessModifier}' cannot be accepted`);
+          throw this.err(`nonAccessModifier '${nonAccessModifier}' cannot be accepted`);
         }
         return nonAccessModifier as JavaNonAccessModifier;
       }));
     }
     if (!('type' in json) || typeof json.type !== 'string') {
-      throw err('VariableDifinition requires a type');
+      throw this.err('requires a type');
     }
     this.type = json.type;
     if ('value' in json && (json.value === null || typeof json.value === 'string')) {
@@ -47,20 +39,14 @@ export default class JavaClassAttribute implements JavaConvertable {
     }
   }
 
-  public toJava (indentationSize: number, currentIndent: number) {
-    const selfIndentation = ' '.repeat(currentIndent);
-    let result = `\n${selfIndentation}`;
-    if (this.accessModifier !== null) {
-      result += `${this.accessModifier} `;
-    }
-    this.nonAccessModifiers.forEach(nonAccessModifier => {
-      result += `${nonAccessModifier} `;
-    });
-    result += `${this.type} ${this.name}`;
-    if (this.value !== null) {
-      result += ` = ${this.value}`;
-    }
-    result += ';';
-    return result;
+  public toString () {
+    return '' +
+      `\n${this.currentIndentString}` +
+      (this.accessModifier ? `${this.accessModifier} ` : '') +
+      this.nonAccessModifiers.join(' ') + (this.nonAccessModifiers.length > 0 ? ' ' : '') +
+      this.type + ' ' +
+      this.name +
+      (this.value !== null ? ` = ${this.value}` : '') +
+      ';';
   }
 }
