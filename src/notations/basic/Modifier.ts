@@ -1,9 +1,9 @@
 export type JavaAccessModifier = null | 'public' | 'private' | 'protected';
 export type JavaNonAccessModifier = 'static' | 'final' | 'abstract' | 'transient' | 'synchronized' | 'volatile';
 
-export function isJavaAccessModifier (s: null | string) {
-  return s === null || [ 'public', 'private', 'protected' ].includes(s);
+export function isJavaAccessModifier (value: any) {
+  return value === null || [ 'public', 'private', 'protected' ].includes(value);
 }
-export function isJavaNonAccessModifier (s: string) {
-  return [ 'static', 'final', 'abstract', 'transient', 'synchronized', 'volatile' ].includes(s);
+export function isJavaNonAccessModifier (value: any) {
+  return [ 'static', 'final', 'abstract', 'transient', 'synchronized', 'volatile' ].includes(value);
 }

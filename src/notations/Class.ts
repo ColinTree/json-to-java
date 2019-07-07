@@ -1,4 +1,4 @@
-import { JsonObject } from '../utils/json';
+import { JsonObject, JsonUtil } from '../utils/json';
 import JavaAnnotation from './Annotation';
 import JavaBaseWithName from './BaseWithName';
 import { isJavaAccessModifier, isJavaNonAccessModifier,
@@ -25,11 +25,11 @@ export default class JavaClass extends JavaBaseWithName {
 
     if ('annotations' in json && Array.isArray(json.annotations)) {
       this.annotations.push(...json.annotations.map(annotation => {
-        if (typeof annotation !== 'object' || Array.isArray(annotation) || annotation === null) {
+        if (!JsonUtil.isJsonObject(annotation)) {
           throw this.err('Anontation should be a pure object array');
         }
         try {
-          return new JavaAnnotation(convertOptions, currentIndent, annotation);
+          return new JavaAnnotation(convertOptions, currentIndent, annotation as JsonObject);
         } catch (e) {
           throw this.err((e as Error).message);
         }
@@ -46,7 +46,7 @@ export default class JavaClass extends JavaBaseWithName {
     }
     if ('nonAccessModifiers' in json && Array.isArray(json.nonAccessModifiers)) {
       this.nonAccessModifiers.push(...json.nonAccessModifiers.map(nonAccessModifier => {
-        if (typeof nonAccessModifier !== 'string' || !isJavaNonAccessModifier(nonAccessModifier)) {
+        if (!isJavaNonAccessModifier(nonAccessModifier)) {
           throw this.err(`nonAccessModifier '${nonAccessModifier}' cannot be accepted`);
         }
         return nonAccessModifier as JavaNonAccessModifier;
@@ -65,7 +65,7 @@ export default class JavaClass extends JavaBaseWithName {
     }
     if ('attributes' in json && Array.isArray(json.attributes)) {
       this.attributes.push(...json.attributes.map(attribute => {
-        if (typeof attribute !== 'object' && Array.isArray(attribute)) {
+        if (!JsonUtil.isJsonObject(attribute)) {
           throw this.err('attributes should be a object array');
         }
         try {
@@ -77,7 +77,7 @@ export default class JavaClass extends JavaBaseWithName {
     }
     if ('constructors' in json && Array.isArray(json.constructors)) {
       this.constructors.push(...json.constructors.map(constructor => {
-        if (typeof constructor !== 'object' && Array.isArray(constructor)) {
+        if (!JsonUtil.isJsonObject(constructor)) {
           throw this.err('constructors should be a object array');
         }
         try {
@@ -89,7 +89,7 @@ export default class JavaClass extends JavaBaseWithName {
     }
     if ('methods' in json && Array.isArray(json.methods)) {
       this.methods.push(...json.methods.map(method => {
-        if (typeof method !== 'object' && Array.isArray(method)) {
+        if (!JsonUtil.isJsonObject(method)) {
           throw this.err('methods should be a object array');
         }
         try {
@@ -101,7 +101,7 @@ export default class JavaClass extends JavaBaseWithName {
     }
     if ('classes' in json && Array.isArray(json.classes)) {
       this.classes.push(...json.classes.map(claz => {
-        if (typeof claz !== 'object' && Array.isArray(claz)) {
+        if (!JsonUtil.isJsonObject(claz)) {
           throw this.err('classes should be a object array');
         }
         try {

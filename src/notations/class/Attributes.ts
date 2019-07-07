@@ -24,7 +24,7 @@ export default class JavaClassAttribute extends JavaBaseWithName {
     }
     if ('nonAccessModifiers' in json && Array.isArray(json.nonAccessModifiers)) {
       this.nonAccessModifiers.push(...json.nonAccessModifiers.map(nonAccessModifier => {
-        if (typeof nonAccessModifier !== 'string' || !isJavaNonAccessModifier(nonAccessModifier)) {
+        if (!isJavaNonAccessModifier(nonAccessModifier)) {
           throw this.err(`nonAccessModifier '${nonAccessModifier}' cannot be accepted`);
         }
         return nonAccessModifier as JavaNonAccessModifier;

@@ -1,4 +1,4 @@
-import { JsonObject } from '../../utils/json';
+import { JsonObject, JsonUtil } from '../../utils/json';
 import JavaAnnotation from '../Annotation';
 import JavaBaseWithName from '../BaseWithName';
 import { isJavaAccessModifier, isJavaNonAccessModifier,
@@ -20,11 +20,11 @@ export default class JavaClassMethod extends JavaBaseWithName {
 
     if ('annotations' in json && Array.isArray(json.annotations)) {
       this.annotations.push(...json.annotations.map(annotation => {
-        if (typeof annotation !== 'object' || Array.isArray(annotation) || annotation === null) {
+        if (!JsonUtil.isJsonObject(annotation)) {
           throw this.err('Anontation should be a pure object array');
         }
         try {
-          return new JavaAnnotation(convertOptions, currentIndent, annotation);
+          return new JavaAnnotation(convertOptions, currentIndent, annotation as JsonObject);
         } catch (e) {
           throw this.err((e as Error).message);
         }
@@ -41,7 +41,7 @@ export default class JavaClassMethod extends JavaBaseWithName {
     }
     if ('nonAccessModifiers' in json && Array.isArray(json.nonAccessModifiers)) {
       this.nonAccessModifiers.push(...json.nonAccessModifiers.map(nonAccessModifier => {
-        if (typeof nonAccessModifier !== 'string' || !isJavaNonAccessModifier(nonAccessModifier)) {
+        if (!isJavaNonAccessModifier(nonAccessModifier)) {
           throw this.err(`nonAccessModifier '${nonAccessModifier}' cannot be accepted`);
         }
         return nonAccessModifier as JavaNonAccessModifier;
@@ -52,7 +52,7 @@ export default class JavaClassMethod extends JavaBaseWithName {
     }
     if ('arguments' in json && Array.isArray(json.arguments)) {
       this.arguments.push(...json.arguments.map(argument => {
-        if (typeof argument !== 'object' && Array.isArray(argument)) {
+        if (!JsonUtil.isJsonObject(argument)) {
           throw this.err('arguments should be a object array');
         }
         try {

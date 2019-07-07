@@ -1,4 +1,4 @@
-import { JsonObject } from '../../utils/json';
+import { JsonObject, JsonUtil } from '../../utils/json';
 import JavaBaseWithName from '../BaseWithName';
 import { isJavaAccessModifier, JavaAccessModifier } from '../basic/Modifier';
 import JavaStatementArray, { JavaStatementToString } from '../basic/Statement';
@@ -24,7 +24,7 @@ export default class JavaClassConstructor extends JavaBaseWithName {
     }
     if ('arguments' in json && Array.isArray(json.arguments)) {
       this.arguments.push(...json.arguments.map(argument => {
-        if (typeof argument !== 'object' && Array.isArray(argument)) {
+        if (!JsonUtil.isJsonObject(argument)) {
           throw this.err('arguments should be a object array');
         }
         try {

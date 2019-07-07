@@ -25,11 +25,7 @@ export default class JavaSingleFile {
       }
       this.convertOptions.indent = json.indentationSize === 'tab' ? '\t' : ' '.repeat(json.indentationSize);
     }
-    if ('convertOptions' in json &&
-        (typeof json.convertOptions !== 'object' ||
-          Array.isArray(json.convertOptions) ||
-          json.convertOptions === null
-        )) {
+    if ('convertOptions' in json && !JsonUtil.isJsonObject(json.convertOptions)) {
       throw new Error('convertOptions should be a JsonObject');
     }
     if ('convertOptions' in json) {
@@ -55,19 +51,16 @@ export default class JavaSingleFile {
         return importElement;
       }));
     }
-    if (!('mainClass' in json) ||
-        typeof json.mainClass !== 'object' ||
-        Array.isArray(json.mainClass) ||
-        json.mainClass === null) {
+    if (!('mainClass' in json) || !JsonUtil.isJsonObject(json.mainClass)) {
       throw new Error('There must be a mainClass defined in a java file');
     }
-    this.mainClass = new JavaClass(this.convertOptions, 0, json.mainClass);
+    this.mainClass = new JavaClass(this.convertOptions, 0, json.mainClass as JsonObject);
     if (![ 'public', null ].includes(this.mainClass.accessModifier)) {
       throw new Error('MainClass of a java file should have "public" or null for its accessModifier');
     }
     if ('otherClasses' in json && Array.isArray(json.otherClasses)) {
       this.otherClasses.push(...json.otherClasses.map(claz => {
-        if (typeof claz !== 'object' && Array.isArray(claz)) {
+        if (!JsonUtil.isJsonObject(claz)) {
           throw new Error('otherClasses should be a object array');
         }
         // TODO: limit modifiers, e.g. private

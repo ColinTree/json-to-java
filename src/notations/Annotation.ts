@@ -1,4 +1,4 @@
-import { JsonObject } from '../utils/json';
+import { JsonObject, JsonUtil } from '../utils/json';
 import JavaBaseWithName from './BaseWithName';
 import { ConvertOptions } from './SingleFile';
 
@@ -12,8 +12,8 @@ export default class JavaAnnotation extends JavaBaseWithName {
       if (typeof json.values === 'string') {
         this.values = json.values;
       } else
-      if (typeof json.values === 'object' && !Array.isArray(json.values) && json.values !== null) {
-        const values = json.values;
+      if (JsonUtil.isJsonObject(json.values)) {
+        const values = json.values as JsonObject;
         const thisValues = {} as { [key: string]: string };
         Object.keys(values).map(key => {
           const value = values[key];
