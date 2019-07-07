@@ -56,9 +56,9 @@ export default class JavaClassAttribute implements JavaConvertable {
     this.nonAccessModifiers.forEach(nonAccessModifier => {
       result += `${nonAccessModifier} `;
     });
-    result += `${this.type} ${this.name} `;
+    result += `${this.type} ${this.name}`;
     if (this.value !== null) {
-      result += `= ${this.value}`;
+      result += ` = ${this.value}`;
     }
     result += ';';
     return result;
