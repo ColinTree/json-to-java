@@ -1,6 +1,6 @@
 {
   "convertOptions": {
-    "indentationSize": "tab"
+    "indent": "tab"
   },
   "package": "_package.is.optional",
   "imports": [
