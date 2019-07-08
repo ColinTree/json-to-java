@@ -55,13 +55,18 @@ export default class JavaClass extends JavaBaseWithName {
     if ('extends' in json && typeof json.extends === 'string') {
       this.extends = json.extends;
     }
-    if ('implements' in json && Array.isArray(json.implements)) {
-      this.implements.push(...json.implements.map(implement => {
-        if (typeof implement !== 'string') {
-          throw this.err('implements should be a strign array');
-        }
-        return implement;
-      }));
+    if ('implements' in json) {
+      if (typeof json.implements === 'string') {
+        json.implements = [ json.implements ];
+      }
+      if (Array.isArray(json.implements)) {
+        this.implements.push(...json.implements.map(implement => {
+          if (typeof implement !== 'string') {
+            throw this.err('implements should be a strign array');
+          }
+          return implement;
+        }));
+      }
     }
     if ('attributes' in json && Array.isArray(json.attributes)) {
       this.attributes.push(...json.attributes.map(attribute => {

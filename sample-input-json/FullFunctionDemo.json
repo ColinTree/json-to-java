@@ -78,7 +78,14 @@
       }
     ],
     "classes": [
-      { "name": "InnerClass" }
+      {
+        "name": "InnerClass1",
+        "implements": "Interface1"
+      },
+      {
+        "name": "InnerClass2",
+        "implements": [ "Interface1", "Interface2" ]
+      }
     ]
   },
   "otherClasses": [
