@@ -21,9 +21,6 @@ export default class JavaStatementIf extends JavaStatementBase {
       if (Array.isArray(json.else)) {
         this.else = JsonArrayToJavaStatement(json.else, convertOptions, currentIndent);
       } else if (typeof json.else === 'object' && json.else !== null) {
-        if (json.else.type !== 'if') {
-          throw new Error('JavaStatementIf didn\'t receice a JsonObject for "else" with "type":"if"');
-        }
         this.else = new JavaStatementIf(convertOptions, currentIndent, json.else);
       }
     }
