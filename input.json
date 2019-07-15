@@ -1,0 +1,58 @@
+{
+  "mainClass": {
+    "name": "Exmaple",
+    "constructors": [
+      {
+        "statements": [
+          "boolean con = true;",
+          {
+            "type": "if",
+            "condition": "con == true",
+            "statements": [ "//" ]
+          },
+          {
+            "type": "if",
+            "condition": "con == false",
+            "statements": [ "//" ],
+            "else": [ "//" ]
+          },
+          {
+            "type": "if",
+            "condition": "con == true",
+            "statements": [
+              {
+                "type": "if",
+                "condition": "con == false",
+                "statements": [ "//" ],
+                "else": [ "//" ]
+              }
+            ],
+            "else": [
+              {
+                "type": "if",
+                "condition": "con == true",
+                "statements": [ "//" ],
+                "else": [ "//" ]
+              }
+            ]
+          },
+          {
+            "type": "if",
+            "condition": "con == false",
+            "statements": [ "//" ],
+            "else": {
+              "type": "if",
+              "condition": "con == true",
+              "statements": [ "//" ]
+            }
+          },
+          {
+            "type": "while",
+            "condition": "con == true",
+            "statements": [ "//" ]
+          }
+        ]
+      }
+    ]
+  }
+}

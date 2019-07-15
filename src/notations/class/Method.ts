@@ -3,7 +3,7 @@ import JavaAnnotation from '../Annotation';
 import JavaBaseWithName from '../BaseWithName';
 import { isJavaAccessModifier, isJavaNonAccessModifier,
   JavaAccessModifier, JavaNonAccessModifier } from '../basic/Modifier';
-import JavaStatementArray, { JavaStatementToString } from '../basic/Statement';
+import { JavaStatementArray, JavaStatementToString, JsonArrayToJavaStatement } from '../basic/Statement';
 import JavaVariableDifinition from '../basic/VariableDifinition';
 import { ConvertOptions } from '../SingleFile';
 
@@ -64,7 +64,7 @@ export default class JavaClassMethod extends JavaBaseWithName {
     }
     if ('statements' in json && Array.isArray(json.statements)) {
       // TODO: check this
-      this.statements.push(...json.statements as JavaStatementArray);
+      this.statements.push(...JsonArrayToJavaStatement(json.statements, convertOptions, currentIndent));
     }
   }
 

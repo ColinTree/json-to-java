@@ -1,7 +1,7 @@
 import { JsonObject, JsonUtil } from '../../utils/json';
 import JavaBaseWithName from '../BaseWithName';
 import { isJavaAccessModifier, JavaAccessModifier } from '../basic/Modifier';
-import JavaStatementArray, { JavaStatementToString } from '../basic/Statement';
+import { JavaStatementArray, JavaStatementToString, JsonArrayToJavaStatement } from '../basic/Statement';
 import JavaVariableDifinition from '../basic/VariableDifinition';
 import { ConvertOptions } from '../SingleFile';
 
@@ -36,7 +36,7 @@ export default class JavaClassConstructor extends JavaBaseWithName {
     }
     if ('statements' in json && Array.isArray(json.statements)) {
       // TODO: check statements
-      this.statements.push(...json.statements as JavaStatementArray);
+      this.statements.push(...JsonArrayToJavaStatement(json.statements, convertOptions, currentIndent));
     }
   }
 
