@@ -47,12 +47,7 @@ export default class JavaSingleFile {
       this.package = json.package;
     }
     if ('imports' in json && Array.isArray(json.imports)) {
-      this.imports.push(...json.imports.map(importElement => {
-        if (typeof importElement !== 'string') {
-          throw new Error('imports should be a string array');
-        }
-        return importElement;
-      }));
+      this.imports.push(...json.imports.map(importElement => String(importElement)));
     }
     // adapt older version which use mainClass as entry
     if ('mainClass' in json && JsonUtil.isJsonObject(json.mainClass)) {
