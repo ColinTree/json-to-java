@@ -1,5 +1,20 @@
 # json-to-java
 
+## Table of content
+
+- [json-to-java](#json-to-java)
+  - [Table of content](#table-of-content)
+  - [how to use](#how-to-use)
+  - [scheme of source json](#scheme-of-source-json)
+    - [ConvertOptions](#convertoptions)
+    - [JavaClass](#javaclass)
+    - [JavaAnnotation](#javaannotation)
+    - [JavaClassAttributes](#javaclassattributes)
+    - [JavaClassConstructor](#javaclassconstructor)
+    - [JavaClassMethod](#javaclassmethod)
+    - [JavaVariableDifinition](#javavariabledifinition)
+    - [JavaStatement](#javastatement)
+
 ## how to use
 
 ```shell
