@@ -8,7 +8,8 @@
     "java.util.List",
     "java.util.ArrayList"
   ],
-  "mainClass": {
+  "entryType": "class",
+  "entry": {
     "annotations": [
       { "name": "MarkerAnnotation" },
       { "name": "SingleValueAnnotation", "values": "\"unused\"" },
@@ -87,9 +88,5 @@
         "implements": [ "Interface1", "Interface2" ]
       }
     ]
-  },
-  "otherClasses": [
-    { "name": "OuterClass1" },
-    { "name": "OuterClass2" }
-  ]
+  }
 }

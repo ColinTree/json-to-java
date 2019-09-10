@@ -14,7 +14,7 @@ $ json-to-java -s path/to/src.json -o path/to/output.java
 * --output (-o) path to output java file
   * default to `%arguemnt::src%.java`, e.g. `input.json.java`
 
-## format of source json
+## scheme of source json
 
 Sample file see in directory `sample-input-json`
 
@@ -29,12 +29,12 @@ Should be a JsonObject
 * `imports`
   * optional, default to empty array
   * **Accept type**: `string[]`
-* `mainClass`
+* `entry`
   * **required**
   * **Accept type**: [JavaClass](#JavaClass)
-* `otherClasses`
-  * optional, default to empty array
-  * **Accept type**: [JavaClass](#JavaClass)[]
+* `entryType`
+  * optional, default to `"class"`
+  * **Accept values**: `"class"`
 
 ### ConvertOptions
 
@@ -73,10 +73,10 @@ Should be a JsonObject
     * `string[]`
 * `attributes`
   * optional, default to empty array
-  * **Accept type**: [JavaAttributes](#JavaAttributes)[]
+  * **Accept type**: [JavaClassAttributes](#JavaClassAttributes)[]
 * `constructors`
   * optional, default to empty array
-  * **Accept type**: [JavaConstructor](#JavaConstructor)[]
+  * **Accept type**: [JavaClassConstructor](#JavaClassConstructor)[]
 * `methods`
   * optional, default to empty array
   * **Accept type**: [JavaClassMethod](#JavaClassMethod)[]

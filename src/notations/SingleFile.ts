@@ -1,5 +1,6 @@
 import { JsonObject, JsonUtil } from '../utils/json';
 import JavaClass from './Class';
+import Console from '../utils/Console';
 
 export interface ConvertOptions {
   indent: string;
@@ -10,12 +11,14 @@ function defaultConvertOptions (): ConvertOptions {
 
 export default class JavaSingleFile {
 
+  public readonly ACCEPTED_ENTRY_TYPES = [ 'class' ];
+
   public readonly convertOptions: ConvertOptions = defaultConvertOptions();
 
   public readonly package: string = '';
   public readonly imports: string[] = [];
-  public readonly mainClass: JavaClass;
-  public readonly otherClasses: JavaClass[] = [];
+  public readonly entryType: 'class' = 'class';
+  public readonly entry: JavaClass;
 
   public constructor (json: JsonObject) {
     if (true) {
@@ -51,22 +54,34 @@ export default class JavaSingleFile {
         return importElement;
       }));
     }
-    if (!('mainClass' in json) || !JsonUtil.isJsonObject(json.mainClass)) {
-      throw new Error('There must be a mainClass defined in a java file');
+    // adapt older version which use mainClass as entry
+    if ('mainClass' in json && JsonUtil.isJsonObject(json.mainClass)) {
+      Console.log('Converted legacy scheme field \'mainClass\' into \'entry\'');
+      json.entryType = 'class';
+      json.entry = json.mainClass;
+      delete json.mainClass;
     }
-    this.mainClass = new JavaClass(this.convertOptions, 0, json.mainClass as JsonObject);
-    if (![ 'public', null ].includes(this.mainClass.accessModifier)) {
-      throw new Error('MainClass of a java file should have "public" or null for its accessModifier');
+    // deprecate field otherClasses
+    if ('otherClasses' in json) {
+      throw new Error('OtherClass is no more accepted in json-to-java scheme');
     }
-    if ('otherClasses' in json && Array.isArray(json.otherClasses)) {
-      this.otherClasses.push(...json.otherClasses.map(claz => {
-        if (!JsonUtil.isJsonObject(claz)) {
-          throw new Error('otherClasses should be a object array');
-        }
-        // TODO: limit modifiers, e.g. private
-        return new JavaClass(this.convertOptions, 0, claz as JsonObject);
-      }));
+    if ('entryType' in json && typeof json.entryType === 'string' && json.entryType in this.ACCEPTED_ENTRY_TYPES) {
+      // since it had been checked above
+      this.entryType = json.entryType as any;
     }
+    if (!('entry' in json) || !JsonUtil.isJsonObject(json.entry)) {
+      throw new Error('There must be an entry in a java file!');
+    }
+    switch (this.entryType) {
+      case 'class':
+        this.entry = new JavaClass(this.convertOptions, 0, json.entry as JsonObject);
+        break;
+      default:
+        throw new Error(`Unrecognized entryType '${this.entryType}'`);
+    }
+    // if (![ 'public', null ].includes(this.entry.accessModifier)) {
+    //   throw new Error('Entry of a java file should have "public" or null for its accessModifier');
+    // }
   }
 
   public toString () {
@@ -77,8 +92,6 @@ export default class JavaSingleFile {
         ? `\n${this.imports.map(importElement => `import ${importElement};`).join('\n')}\n`
         : '') +
 
-      `${this.mainClass}\n` +
-
-      this.otherClasses.join('\n') + (this.otherClasses.length > 0 ? '\n' : '');
+      `${this.entry}\n`;
   }
 }
