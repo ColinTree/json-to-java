@@ -1,5 +1,5 @@
+import J2JError from '../../utils/J2JError';
 import { JsonArray } from '../../utils/json';
-import { ConvertOptions } from '../SingleFile';
 import JavaStatementBase from './statements/Base';
 import JavaStatementIf from './statements/If';
 import JavaStatementWhile from './statements/While';
@@ -7,33 +7,35 @@ import JavaStatementWhile from './statements/While';
 export type JavaStatement = string | JavaStatementBase | JavaStatementArray;
 export interface JavaStatementArray extends Array<JavaStatement> {}
 
-export function JsonArrayToJavaStatement (
-    statementJson: JsonArray, convertOptions: ConvertOptions, currentIndent: number) {
-  const statements = [] as JavaStatementArray;
-  statementJson.forEach(statementItem => {
+export function parseJavaStatements (receiver: JavaStatement[], statementJson: JsonArray, currentIndent: number) {
+  const nameWhenAsEmitter = 'Statement';
+
+  statementJson.forEach((statementItem, index) => {
     if (typeof statementItem === 'string') {
-      statements.push(statementItem);
+      receiver.push(statementItem);
     } else if (Array.isArray(statementItem)) {
-      statements.push(JsonArrayToJavaStatement(statementItem, convertOptions, currentIndent + 1));
+      const subReceiver = [] as JavaStatement[];
+      parseJavaStatements(subReceiver, statementItem, currentIndent + 1);
+      receiver.push(subReceiver);
     } else if (typeof statementItem === 'object' && statementItem !== null) {
       switch (statementItem.type) {
         case 'if': {
-          statements.push(new JavaStatementIf(convertOptions, currentIndent, statementItem));
+          receiver.push(new JavaStatementIf(currentIndent, statementItem));
           break;
         }
         case 'while': {
-          statements.push(new JavaStatementWhile(convertOptions, currentIndent, statementItem));
+          receiver.push(new JavaStatementWhile(currentIndent, statementItem));
           break;
         }
         default: {
-          throw new Error('Unaccepted type of a statement (in form of JsonObject): ' + statementItem.type);
+          throw new J2JError(nameWhenAsEmitter,
+            'Unaccepted type of a statement (in form of JsonObject): ' + statementItem.type);
         }
       }
     } else {
-      throw new Error('Unaccepted value type of statement: ' + typeof statementItem);
+      throw new J2JError(nameWhenAsEmitter, 'JsonType is not accepted in statement: ' + JSON.stringify(statementItem));
     }
   });
-  return statements;
 }
 
 /**

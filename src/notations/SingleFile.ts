@@ -1,19 +1,21 @@
+import J2JError from '../utils/J2JError';
 import { JsonObject, JsonUtil } from '../utils/json';
+import QuickConsole from '../utils/QuickConsole';
 import JavaClass from './Class';
-import Console from '../utils/Console';
 
-export interface ConvertOptions {
+interface ConvertOptions {
   indent: string;
 }
 function defaultConvertOptions (): ConvertOptions {
   return { indent: '    ' };
 }
+export const globalConvertOptions: ConvertOptions = defaultConvertOptions();
 
 export default class JavaSingleFile {
 
   public readonly ACCEPTED_ENTRY_TYPES = [ 'class' ];
 
-  public readonly convertOptions: ConvertOptions = defaultConvertOptions();
+  public readonly nameWhenAsEmitter: string;
 
   public readonly package: string = '';
   public readonly imports: string[] = [];
@@ -21,62 +23,96 @@ export default class JavaSingleFile {
   public readonly entry: JavaClass;
 
   public constructor (json: JsonObject) {
-    if (true) {
-      // TODO: remove this in the future, this is kept as backward compatible
+    this.nameWhenAsEmitter = 'file root';
+
+    // convert legacy field indentationSize into field convertOptions.indent
+    if ('indentationSize' in json) {
+      QuickConsole.warnDeprecated(this, 'indentationSize', 'convertOptions.indent');
       if (typeof json.indentationSize !== 'number' && json.indentationSize !== 'tab') {
+        QuickConsole.warnTypeWithReplacement(this, 'indentationSize', [ Number, 'string "tab"' ], '4');
         json.indentationSize = 4;
       }
-      this.convertOptions.indent = json.indentationSize === 'tab' ? '\t' : ' '.repeat(json.indentationSize);
-    }
-    if ('convertOptions' in json && !JsonUtil.isJsonObject(json.convertOptions)) {
-      throw new Error('convertOptions should be a JsonObject');
+      json.convertOptions = (json.convertOptions || {}) as JsonObject;
+      json.convertOptions.indent = json.indentationSize === 'tab' ? 'tab' : json.indentationSize;
     }
     if ('convertOptions' in json) {
-      const convertOptions = json.convertOptions as JsonObject;
-      if ('indent' in convertOptions) {
-        if (typeof convertOptions.indent === 'number') {
-          this.convertOptions.indent = ' '.repeat(convertOptions.indent);
-        } else if (convertOptions.indent === 'tab') {
-          this.convertOptions.indent = '\t';
-        } else {
-          throw new Error('convertOptions.indent should be a number or string "tab"');
+      if (JsonUtil.isJsonObject(json.convertOptions)) {
+        const convertOptions = json.convertOptions as JsonObject;
+        if ('indent' in convertOptions) {
+          if (typeof convertOptions.indent === 'number') {
+            globalConvertOptions.indent = ' '.repeat(convertOptions.indent);
+          } else if (convertOptions.indent === 'tab') {
+            globalConvertOptions.indent = '\t';
+          } else {
+            QuickConsole.warnIgnoreField(this, 'convertOptions.indent', [ Number, 'string "tab"' ]);
+          }
         }
+      } else {
+        QuickConsole.warnIgnoreField(this, 'convertOptions', Object);
       }
     }
-    if ('package' in json && typeof json.package === 'string') {
-      this.package = json.package;
+    if ('package' in json) {
+      if (typeof json.package === 'string') {
+        this.package = json.package;
+      } else {
+        QuickConsole.warnIgnoreField(this, 'package', String);
+      }
     }
-    if ('imports' in json && Array.isArray(json.imports)) {
-      this.imports.push(...json.imports.map(importElement => String(importElement)));
+    if ('imports' in json) {
+      if (Array.isArray(json.imports)) {
+        const length = json.imports.length;
+        json.imports.forEach((importElement, index) => {
+          if (typeof importElement !== 'string') {
+            QuickConsole.warnElementType(this, 'imports', index, length, String);
+          }
+          this.imports.push(String(importElement));
+        });
+      } else {
+        QuickConsole.warnIgnoreField(this, 'imports', Array);
+      }
     }
-    // adapt older version which use mainClass as entry
-    if ('mainClass' in json && JsonUtil.isJsonObject(json.mainClass)) {
-      Console.log('Converted legacy scheme field \'mainClass\' into \'entry\'');
-      json.entryType = 'class';
-      json.entry = json.mainClass;
-      delete json.mainClass;
+    // convert legacy field mainClass into field entry
+    if ('mainClass' in json) {
+      QuickConsole.warnDeprecated(this, 'mainClass', 'entry');
+      if (JsonUtil.isJsonObject(json.mainClass)) {
+        json.entryType = 'class';
+        json.entry = json.mainClass;
+        delete json.mainClass;
+      } else {
+        QuickConsole.warnIgnoreField(this, 'mainClass', Object);
+      }
     }
-    // deprecate field otherClasses
+    // deprecated field otherClasses
     if ('otherClasses' in json) {
-      throw new Error('OtherClass is no more accepted in json-to-java scheme');
+      QuickConsole.warnRemoved(this, 'otherClasses');
     }
-    if ('entryType' in json && typeof json.entryType === 'string' && json.entryType in this.ACCEPTED_ENTRY_TYPES) {
-      // since it had been checked above
-      this.entryType = json.entryType as any;
+    if ('entryType' in json) {
+      if (this.ACCEPTED_ENTRY_TYPES.includes(json.entryType as any)) {
+        this.entryType = json.entryType as any;
+      } else {
+        QuickConsole.warnIgnoreField(this, 'entryType', this.ACCEPTED_ENTRY_TYPES.map(type => `"${type}"`));
+      }
     }
-    if (!('entry' in json) || !JsonUtil.isJsonObject(json.entry)) {
-      throw new Error('There must be an entry in a java file!');
+    if ('entry' in json) {
+      if (JsonUtil.isJsonObject(json.entry)) {
+        switch (this.entryType) {
+          case 'class':
+            this.entry = new JavaClass(0, json.entry as JsonObject);
+            break;
+          default:
+            // impossible since type is checked above as field
+            throw J2JError.valueNotAccepted(this, 'entryType',  this.entryType);
+        }
+        const acceptedAccessModifier = [ 'public', null ];
+        if (!acceptedAccessModifier.includes(this.entry.accessModifier)) {
+          throw J2JError.typeError(this, 'entry.accessModifier', acceptedAccessModifier);
+        }
+      } else {
+        throw J2JError.typeError(this, 'entry', Object);
+      }
+    } else {
+      throw J2JError.fieldNotDefined(this, 'entry');
     }
-    switch (this.entryType) {
-      case 'class':
-        this.entry = new JavaClass(this.convertOptions, 0, json.entry as JsonObject);
-        break;
-      default:
-        throw new Error(`Unrecognized entryType '${this.entryType}'`);
-    }
-    // if (![ 'public', null ].includes(this.entry.accessModifier)) {
-    //   throw new Error('Entry of a java file should have "public" or null for its accessModifier');
-    // }
   }
 
   public toString () {

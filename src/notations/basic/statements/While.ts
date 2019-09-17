@@ -1,20 +1,32 @@
+import J2JError from '../../../utils/J2JError';
 import { JsonObject } from '../../../utils/json';
-import { ConvertOptions } from '../../SingleFile';
-import { JavaStatementArray, JsonArrayToJavaStatement } from '../Statement';
+import QuickConsole from '../../../utils/QuickConsole';
+import { JavaStatementArray, parseJavaStatements } from '../Statement';
 import JavaStatementBase from './Base';
 
 export default class JavaStatementWhile extends JavaStatementBase {
   private condition: string;
   private statements: JavaStatementArray = [];
 
-  public constructor (convertOptions: ConvertOptions, currentIndent: number, json: JsonObject) {
-    super(convertOptions, currentIndent);
-    if (typeof json.condition !== 'string') {
-      throw new Error('Condition of JavaStatementIf should be a string');
+  public constructor (currentIndent: number, json: JsonObject) {
+    super(currentIndent);
+    this.nameWhenAsEmitter = 'While Statement';
+
+    if ('condition' in json) {
+      if (typeof json.condition === 'string') {
+        this.condition = json.condition;
+      } else {
+        throw J2JError.typeError(this, 'condition', String);
+      }
+    } else {
+      throw J2JError.fieldNotDefined(this, 'condition');
     }
-    this.condition = json.condition;
-    if ('statements' in json && Array.isArray(json.statements)) {
-      this.statements.push(...JsonArrayToJavaStatement(json.statements, convertOptions, currentIndent + 1));
+    if ('statements' in json) {
+      if (Array.isArray(json.statements)) {
+        parseJavaStatements(this.statements, json.statements, currentIndent + 1);
+      } else {
+        QuickConsole.warnIgnoreField('while', 'statements', Array);
+      }
     }
   }
 

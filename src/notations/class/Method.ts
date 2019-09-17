@@ -1,11 +1,23 @@
-import { JsonObject, JsonUtil } from '../../utils/json';
-import JavaAnnotation from '../Annotation';
+import J2JError from '../../utils/J2JError';
+import { JsonArray, JsonObject, JsonUtil } from '../../utils/json';
+import QuickConsole from '../../utils/QuickConsole';
+import JavaAnnotation, { parseAnnotations } from '../Annotation';
 import JavaBaseWithName from '../BaseWithName';
-import { isJavaAccessModifier, isJavaNonAccessModifier,
-  JavaAccessModifier, JavaNonAccessModifier } from '../basic/Modifier';
-import { JavaStatementArray, JavaStatementToString, JsonArrayToJavaStatement } from '../basic/Statement';
-import JavaVariableDifinition from '../basic/VariableDifinition';
-import { ConvertOptions } from '../SingleFile';
+import { isJavaAccessModifier, JavaAccessModifier,
+  JavaNonAccessModifier, parseNonAccessModifiers } from '../basic/Modifier';
+import { JavaStatementArray, JavaStatementToString, parseJavaStatements } from '../basic/Statement';
+import JavaVariableDifinition, { parseVariableDifinitions } from '../basic/VariableDifinition';
+
+export function parseMethods (
+    emitter: any, fieldName: string, receiver: JavaClassMethod[], methodJson: JsonArray, currentIndent: number) {
+  methodJson.forEach((attribute, index) => {
+    if (JsonUtil.isJsonObject(attribute)) {
+      receiver.push(new JavaClassMethod(currentIndent + 1, attribute as JsonObject));
+    } else {
+      throw J2JError.elementTypeError(emitter, fieldName, index, methodJson.length, Object);
+    }
+  });
+}
 
 export default class JavaClassMethod extends JavaBaseWithName {
   public readonly annotations: JavaAnnotation[] = [];
@@ -15,56 +27,49 @@ export default class JavaClassMethod extends JavaBaseWithName {
   public readonly arguments: JavaVariableDifinition[] = [];
   public readonly statements: JavaStatementArray = [];
 
-  public constructor (convertOptions: ConvertOptions, currentIndent: number, json: JsonObject) {
-    super(convertOptions, currentIndent, json.name);
+  public constructor (currentIndent: number, json: JsonObject) {
+    super(currentIndent, json.name);
+    this.nameWhenAsEmitter = 'Method';
 
-    if ('annotations' in json && Array.isArray(json.annotations)) {
-      this.annotations.push(...json.annotations.map(annotation => {
-        if (!JsonUtil.isJsonObject(annotation)) {
-          throw this.err('Anontation should be a pure object array');
-        }
-        try {
-          return new JavaAnnotation(convertOptions, currentIndent, annotation as JsonObject);
-        } catch (e) {
-          throw this.err((e as Error).message);
-        }
-      }));
+    if ('annotations' in json) {
+      if (Array.isArray(json.annotations)) {
+        parseAnnotations(this, 'annotations', this.annotations, json.annotations, currentIndent);
+      } else {
+        QuickConsole.warnIgnoreField(this, 'annotations', Array);
+      }
     }
     if ('accessModifier' in json) {
-      if (json.accessModifier !== null && typeof json.accessModifier !== 'string') {
-        throw this.err(`accessModifier '${json.accessModifier}' connot be accepted`);
+      if (isJavaAccessModifier(json.accessModifier)) {
+        this.accessModifier = json.accessModifier as JavaAccessModifier;
+      } else {
+        throw J2JError.valueNotAccepted(this, 'accessModifier', json.accessModifier);
       }
-      if (!isJavaAccessModifier(json.accessModifier)) {
-        throw this.err(`accessModifier '${json.accessModifier}' connot be accepted`);
+    }
+    if ('nonAccessModifiers' in json) {
+      if (Array.isArray(json.nonAccessModifiers)) {
+        parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, json.nonAccessModifiers);
+      } else {
+        QuickConsole.warnIgnoreField(this, 'nonAccessModifiers', Array);
       }
-      this.accessModifier = json.accessModifier as JavaAccessModifier;
     }
-    if ('nonAccessModifiers' in json && Array.isArray(json.nonAccessModifiers)) {
-      this.nonAccessModifiers.push(...json.nonAccessModifiers.map(nonAccessModifier => {
-        if (!isJavaNonAccessModifier(nonAccessModifier)) {
-          throw this.err(`nonAccessModifier '${nonAccessModifier}' cannot be accepted`);
-        }
-        return nonAccessModifier as JavaNonAccessModifier;
-      }));
+    if ('type' in json) {
+      if (typeof json.type === 'string') {
+        this.type = json.type;
+      } else {
+        QuickConsole.warnIgnoreField(this, 'type', String);
+      }
     }
-    if ('type' in json && typeof json.type === 'string') {
-      this.type = json.type;
+    if ('arguments' in json) {
+      if (Array.isArray(json.arguments)) {
+        parseVariableDifinitions(this, 'arguments', this.arguments, json.arguments, currentIndent);
+      }
     }
-    if ('arguments' in json && Array.isArray(json.arguments)) {
-      this.arguments.push(...json.arguments.map(argument => {
-        if (!JsonUtil.isJsonObject(argument)) {
-          throw this.err('arguments should be a object array');
-        }
-        try {
-          return new JavaVariableDifinition(convertOptions, currentIndent, argument as JsonObject);
-        } catch (e) {
-          throw this.err((e as Error).message);
-        }
-      }));
-    }
-    if ('statements' in json && Array.isArray(json.statements)) {
-      // TODO: check this
-      this.statements.push(...JsonArrayToJavaStatement(json.statements, convertOptions, currentIndent));
+    if ('statements' in json) {
+      if (Array.isArray(json.statements)) {
+        parseJavaStatements(this.statements, json.statements, currentIndent);
+      } else {
+        QuickConsole.warnIgnoreField(this, 'statements', Array);
+      }
     }
   }
 

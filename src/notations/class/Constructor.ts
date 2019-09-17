@@ -1,42 +1,50 @@
-import { JsonObject, JsonUtil } from '../../utils/json';
+import J2JError from '../../utils/J2JError';
+import { JsonArray, JsonObject, JsonUtil } from '../../utils/json';
+import QuickConsole from '../../utils/QuickConsole';
 import JavaBaseWithName from '../BaseWithName';
 import { isJavaAccessModifier, JavaAccessModifier } from '../basic/Modifier';
-import { JavaStatementArray, JavaStatementToString, JsonArrayToJavaStatement } from '../basic/Statement';
-import JavaVariableDifinition from '../basic/VariableDifinition';
-import { ConvertOptions } from '../SingleFile';
+import { JavaStatementArray, JavaStatementToString, parseJavaStatements } from '../basic/Statement';
+import JavaVariableDifinition, { parseVariableDifinitions } from '../basic/VariableDifinition';
+
+export function parseConstructors (
+    emitter: any, fieldName: string, className: string, receiver: JavaClassConstructor[],
+    constructorJson: JsonArray, currentIndent: number) {
+  constructorJson.forEach((attribute, index) => {
+    if (JsonUtil.isJsonObject(attribute)) {
+      receiver.push(new JavaClassConstructor(currentIndent + 1, className, attribute as JsonObject));
+    } else {
+      throw J2JError.elementTypeError(emitter, fieldName, index, constructorJson.length, Object);
+    }
+  });
+}
 
 export default class JavaClassConstructor extends JavaBaseWithName {
   public accessModifier: JavaAccessModifier = null;
   public arguments: JavaVariableDifinition[] = [];
   public statements: JavaStatementArray = [];
 
-  public constructor (convertOptions: ConvertOptions, currentIndent: number, className: string, json: JsonObject) {
-    super(convertOptions, currentIndent, className);
+  public constructor (currentIndent: number, className: string, json: JsonObject) {
+    super(currentIndent, className);
+    this.nameWhenAsEmitter = 'Constructor';
 
     if ('accessModifier' in json) {
-      if (json.accessModifier !== null && typeof json.accessModifier !== 'string') {
-        throw this.err(`accessModifier '${json.accessModifier}' connot be accepted`);
+      if (isJavaAccessModifier(json.accessModifier)) {
+        this.accessModifier = json.accessModifier as JavaAccessModifier;
+      } else {
+        throw J2JError.valueNotAccepted(this, 'accessModifier', json.accessModifier);
       }
-      if (!isJavaAccessModifier(json.accessModifier)) {
-        throw this.err(`accessModifier '${json.accessModifier}' connot be accepted`);
+    }
+    if ('arguments' in json) {
+      if (Array.isArray(json.arguments)) {
+        parseVariableDifinitions(this, 'arguments', this.arguments, json.arguments, currentIndent);
       }
-      this.accessModifier = json.accessModifier as JavaAccessModifier;
     }
-    if ('arguments' in json && Array.isArray(json.arguments)) {
-      this.arguments.push(...json.arguments.map(argument => {
-        if (!JsonUtil.isJsonObject(argument)) {
-          throw this.err('arguments should be a object array');
-        }
-        try {
-          return new JavaVariableDifinition(convertOptions, currentIndent, argument as JsonObject);
-        } catch (e) {
-          throw this.err((e as Error).message);
-        }
-      }));
-    }
-    if ('statements' in json && Array.isArray(json.statements)) {
-      // TODO: check statements
-      this.statements.push(...JsonArrayToJavaStatement(json.statements, convertOptions, currentIndent));
+    if ('statements' in json) {
+      if (Array.isArray(json.statements)) {
+        parseJavaStatements(this.statements, json.statements, currentIndent);
+      } else {
+        QuickConsole.warnIgnoreField(this, 'statements', Array);
+      }
     }
   }
 

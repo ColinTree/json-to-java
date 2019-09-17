@@ -1,12 +1,24 @@
-import { JsonObject, JsonUtil } from '../utils/json';
-import JavaAnnotation from './Annotation';
+import J2JError from '../utils/J2JError';
+import { JsonArray, JsonObject, JsonUtil } from '../utils/json';
+import QuickConsole from '../utils/QuickConsole';
+import JavaAnnotation, { parseAnnotations } from './Annotation';
 import JavaBaseWithName from './BaseWithName';
-import { isJavaAccessModifier, isJavaNonAccessModifier,
-  JavaAccessModifier, JavaNonAccessModifier } from './basic/Modifier';
-import JavaClassAttribute from './class/Attributes';
-import JavaClassConstructor from './class/Constructor';
-import JavaClassMethod from './class/Method';
-import { ConvertOptions } from './SingleFile';
+import { isJavaAccessModifier, JavaAccessModifier,
+  JavaNonAccessModifier, parseNonAccessModifiers } from './basic/Modifier';
+import JavaClassAttribute, { parseAttributes } from './class/Attributes';
+import JavaClassConstructor, { parseConstructors } from './class/Constructor';
+import JavaClassMethod, { parseMethods } from './class/Method';
+
+export function parseClasses (
+    emitter: any, fieldName: string, receiver: JavaClass[], classJson: JsonArray, currentIndent: number) {
+  classJson.forEach((claz, index) => {
+    if (JsonUtil.isJsonObject(claz)) {
+      receiver.push(new JavaClass(currentIndent + 1, claz as JsonObject));
+    } else {
+      throw J2JError.elementTypeError(emitter, fieldName, index, classJson.length, Object);
+    }
+  });
+}
 
 export default class JavaClass extends JavaBaseWithName {
   public readonly annotations: JavaAnnotation[] = [];
@@ -20,101 +32,78 @@ export default class JavaClass extends JavaBaseWithName {
   public readonly methods: JavaClassMethod[] = [];
   public readonly classes: JavaClass[] = [];
 
-  public constructor (convertOptions: ConvertOptions, currentIndent: number, json: JsonObject) {
-    super(convertOptions, currentIndent, json.name);
+  public constructor (currentIndent: number, json: JsonObject) {
+    super(currentIndent, json.name);
+    this.nameWhenAsEmitter = 'Class';
 
-    if ('annotations' in json && Array.isArray(json.annotations)) {
-      this.annotations.push(...json.annotations.map(annotation => {
-        if (!JsonUtil.isJsonObject(annotation)) {
-          throw this.err('Anontation should be a pure object array');
-        }
-        try {
-          return new JavaAnnotation(convertOptions, currentIndent, annotation as JsonObject);
-        } catch (e) {
-          throw this.err((e as Error).message);
-        }
-      }));
+    if ('annotations' in json) {
+      if (Array.isArray(json.annotations)) {
+        parseAnnotations(this, 'annotations', this.annotations, json.annotations, currentIndent);
+      } else {
+        QuickConsole.warnIgnoreField(this, 'annotations', Array);
+      }
     }
     if ('accessModifier' in json) {
-      if (json.accessModifier !== null && typeof json.accessModifier !== 'string') {
-        throw this.err('accessModifier should be null or string');
+      if (isJavaAccessModifier(json.accessModifier)) {
+        this.accessModifier = json.accessModifier as JavaAccessModifier;
+      } else {
+        throw J2JError.valueNotAccepted(this, 'accessModifier', json.accessModifier);
       }
-      if (!isJavaAccessModifier(json.accessModifier)) {
-        throw this.err(`accessModifier '${json.accessModifier}' connot be accepted`);
+    }
+    if ('nonAccessModifiers' in json) {
+      if (Array.isArray(json.nonAccessModifiers)) {
+        parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, json.nonAccessModifiers);
+      } else {
+        QuickConsole.warnIgnoreField(this, 'nonAccessModifiers', Array);
       }
-      this.accessModifier = json.accessModifier as JavaAccessModifier;
     }
-    if ('nonAccessModifiers' in json && Array.isArray(json.nonAccessModifiers)) {
-      this.nonAccessModifiers.push(...json.nonAccessModifiers.map(nonAccessModifier => {
-        if (!isJavaNonAccessModifier(nonAccessModifier)) {
-          throw this.err(`nonAccessModifier '${nonAccessModifier}' cannot be accepted`);
-        }
-        return nonAccessModifier as JavaNonAccessModifier;
-      }));
-    }
-    if ('extends' in json && typeof json.extends === 'string') {
-      this.extends = json.extends;
+    if ('extends' in json) {
+      if (typeof json.extends === 'string') {
+        this.extends = json.extends;
+      } else {
+        QuickConsole.warnIgnoreField(this, 'extends', String);
+      }
     }
     if ('implements' in json) {
-      if (typeof json.implements === 'string') {
+      if (Array.isArray(json.implements)) {
+        const length = json.implements.length;
+        json.implements.forEach((implement, index) => {
+          if (typeof implement === 'string') {
+            QuickConsole.warnElementType(this, 'implements', index, length, String);
+          }
+          this.implements.push(String(implement));
+        });
+      } else {
         json.implements = [ json.implements ];
       }
-      if (Array.isArray(json.implements)) {
-        this.implements.push(...json.implements.map(implement => {
-          if (typeof implement !== 'string') {
-            throw this.err('implements should be a strign array');
-          }
-          return implement;
-        }));
+    }
+    if ('attributes' in json) {
+      if (Array.isArray(json.attributes)) {
+        parseAttributes(this, 'attributes', this.attributes, json.attributes, currentIndent);
+      } else {
+        QuickConsole.warnIgnoreField(this, 'attributes', Array);
       }
     }
-    if ('attributes' in json && Array.isArray(json.attributes)) {
-      this.attributes.push(...json.attributes.map(attribute => {
-        if (!JsonUtil.isJsonObject(attribute)) {
-          throw this.err('attributes should be a object array');
-        }
-        try {
-          return new JavaClassAttribute(convertOptions, currentIndent + 1, attribute as JsonObject);
-        } catch (e) {
-          throw this.err((e as Error).message);
-        }
-      }));
+    if ('constructors' in json) {
+      if (Array.isArray(json.constructors)) {
+        parseConstructors(this, 'constructors', this.name, this.constructors, json.constructors, currentIndent + 1);
+      } else {
+        QuickConsole.warnIgnoreField(this, 'constructors', Array);
+      }
     }
-    if ('constructors' in json && Array.isArray(json.constructors)) {
-      this.constructors.push(...json.constructors.map(constructor => {
-        if (!JsonUtil.isJsonObject(constructor)) {
-          throw this.err('constructors should be a object array');
-        }
-        try {
-          return new JavaClassConstructor(convertOptions, currentIndent + 1, this.name, constructor as JsonObject);
-        } catch (e) {
-          throw this.err((e as Error).message);
-        }
-      }));
+    if ('methods' in json) {
+      if (Array.isArray(json.methods)) {
+        parseMethods(this, 'methods', this.methods, json.methods, currentIndent + 1);
+      } else {
+        QuickConsole.warnIgnoreField(this, 'methods', Array);
+      }
     }
-    if ('methods' in json && Array.isArray(json.methods)) {
-      this.methods.push(...json.methods.map(method => {
-        if (!JsonUtil.isJsonObject(method)) {
-          throw this.err('methods should be a object array');
-        }
-        try {
-          return new JavaClassMethod(convertOptions, currentIndent + 1, method as JsonObject);
-        } catch (e) {
-          throw this.err((e as Error).message);
-        }
-      }));
-    }
-    if ('classes' in json && Array.isArray(json.classes)) {
-      this.classes.push(...json.classes.map(claz => {
-        if (!JsonUtil.isJsonObject(claz)) {
-          throw this.err('classes should be a object array');
-        }
-        try {
-          return new JavaClass(convertOptions, currentIndent + 1, claz as JsonObject);
-        } catch (e) {
-          throw this.err((e as Error).message);
-        }
-      }));
+    if ('classes' in json) {
+      if (Array.isArray(json.classes)) {
+        parseClasses(this, 'classes', this.classes, json.classes, currentIndent + 1);
+      } else {
+        QuickConsole.warnIgnoreField(this, 'classes', Array);
+      }
     }
   }
 

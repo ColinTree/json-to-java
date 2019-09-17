@@ -1,18 +1,19 @@
-import { ConvertOptions } from './SingleFile';
+import { globalConvertOptions } from './SingleFile';
 
 export default abstract class JavaBase {
-  public readonly convertOptions: ConvertOptions;
+  public nameWhenAsEmitter: string;
+
   public readonly currentIndentString: string;
   private readonly currentIndent: number;
 
-  public constructor (convertOptions: ConvertOptions, currentIndent: number) {
-    this.convertOptions = convertOptions;
-    this.currentIndentString = this.convertOptions.indent.repeat(currentIndent);
+  public constructor (currentIndent: number) {
+    this.nameWhenAsEmitter = this.constructor.name;
+    this.currentIndentString = globalConvertOptions.indent.repeat(currentIndent);
     this.currentIndent = currentIndent;
   }
 
   public contentIndentString (depth = 1) {
-    return this.convertOptions.indent.repeat(this.currentIndent + depth);
+    return globalConvertOptions.indent.repeat(this.currentIndent + depth);
   }
 
 }

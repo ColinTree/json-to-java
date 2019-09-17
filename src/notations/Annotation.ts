@@ -1,28 +1,43 @@
-import { JsonObject, JsonUtil } from '../utils/json';
+import J2JError from '../utils/J2JError';
+import { JsonArray, JsonObject, JsonUtil } from '../utils/json';
+import QuickConsole from '../utils/QuickConsole';
 import JavaBaseWithName from './BaseWithName';
-import { ConvertOptions } from './SingleFile';
+
+export function parseAnnotations (
+    emitter: any, fieldName: string, receiver: JavaAnnotation[], annotationJson: JsonArray, currentIndent: number) {
+  annotationJson.forEach((annotation, index) => {
+    if (JsonUtil.isJsonObject(annotation)) {
+      receiver.push(new JavaAnnotation(currentIndent, annotation as JsonObject));
+    } else {
+      throw J2JError.elementTypeError(emitter, fieldName, index, annotationJson.length, Object);
+    }
+  });
+}
 
 export default class JavaAnnotation extends JavaBaseWithName {
   public readonly values: { [key: string]: string } | string | null = null;
 
-  public constructor (convertOptions: ConvertOptions, currentIndent: number, json: JsonObject) {
-    super(convertOptions, currentIndent, json.name);
+  public constructor (currentIndent: number, json: JsonObject) {
+    super(currentIndent, json.name);
+    this.nameWhenAsEmitter = 'Annotation';
 
     if ('values' in json) {
       if (typeof json.values === 'string') {
         this.values = json.values;
-      } else
-      if (JsonUtil.isJsonObject(json.values)) {
+      } else if (JsonUtil.isJsonObject(json.values)) {
         const values = json.values as JsonObject;
-        const thisValues = {} as { [key: string]: string };
-        Object.keys(values).map(key => {
-          const value = values[key];
+        const newValues = {} as { [key: string]: string };
+        Object.keys(values).forEach(key => {
+          let value = values[key];
           if (typeof value !== 'string') {
-            throw new Error('Anontation values should be an object that both key & value are string');
+            QuickConsole.warnValueTypeOfKey(this, 'values', key, String);
+            value = String(value);
           }
-          thisValues[key] = value;
+          newValues[key] = value;
         });
-        this.values = thisValues;
+        this.values = newValues;
+      } else {
+        QuickConsole.warnIgnoreField(this, 'values', [ String, Object ]);
       }
     }
   }

@@ -14,19 +14,19 @@ if (options.output === FLAG_DEFAULT_OUTPUT) {
   options.output = options.src + '.java';
 }
 
-Console.log('JsonToJava:');
-Console.log(`- src=${options.src}`);
-Console.log(`- output=${options.output}`);
+Console.log(null, 'JsonToJava:');
+Console.log(null, `- src=${options.src}`);
+Console.log(null, `- output=${options.output}`);
 
 if (!fs.existsSync(options.src)) {
-  Console.error(`Source file not found: ${options.src}`);
+  Console.error(null, `Source file not found: ${options.src}`);
   process.exit();
 }
 
 try {
   const result = JsonToJava(String(fs.readFileSync(options.src)));
   fs.writeFileSync(options.output, result);
-  Console.log(`Result had already written to ${options.output}`);
+  Console.log(null, `Result had already written to ${options.output}`);
 } catch (e) {
-  Console.error(e);
+  Console.error(null, e);
 }

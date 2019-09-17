@@ -1,8 +1,20 @@
-import { JsonObject } from '../../utils/json';
+import J2JError from '../../utils/J2JError';
+import { JsonArray, JsonObject, JsonUtil } from '../../utils/json';
+import QuickConsole from '../../utils/QuickConsole';
 import JavaBaseWithName from '../BaseWithName';
-import { isJavaAccessModifier, isJavaNonAccessModifier,
-  JavaAccessModifier, JavaNonAccessModifier } from '../basic/Modifier';
-import { ConvertOptions } from '../SingleFile';
+import { isJavaAccessModifier, JavaAccessModifier,
+  JavaNonAccessModifier, parseNonAccessModifiers } from '../basic/Modifier';
+
+export function parseAttributes (
+    emitter: any, fieldName: string, receiver: JavaClassAttribute[], attributeJson: JsonArray, currentIndent: number) {
+  attributeJson.forEach((attribute, index) => {
+    if (JsonUtil.isJsonObject(attribute)) {
+      receiver.push(new JavaClassAttribute(currentIndent + 1, attribute as JsonObject));
+    } else {
+      throw J2JError.elementTypeError(emitter, fieldName, index, attributeJson.length, Object);
+    }
+  });
+}
 
 export default class JavaClassAttribute extends JavaBaseWithName {
   public readonly accessModifier: JavaAccessModifier = null;
@@ -10,32 +22,39 @@ export default class JavaClassAttribute extends JavaBaseWithName {
   public readonly type: string;
   public readonly value: string | null = null;
 
-  public constructor (convertOptions: ConvertOptions, currentIndent: number, json: JsonObject) {
-    super(convertOptions, currentIndent, json.name);
+  public constructor (currentIndent: number, json: JsonObject) {
+    super(currentIndent, json.name);
+    this.nameWhenAsEmitter = 'Attribute';
 
     if ('accessModifier' in json) {
-      if (json.accessModifier !== null && typeof json.accessModifier !== 'string') {
-        throw this.err(`accessModifier '${json.accessModifier}' connot be accepted`);
+      if (isJavaAccessModifier(json.accessModifier)) {
+        this.accessModifier = json.accessModifier as JavaAccessModifier;
+      } else {
+        throw J2JError.valueNotAccepted(this, 'accessModifier', json.accessModifier);
       }
-      if (!isJavaAccessModifier(json.accessModifier)) {
-        throw this.err(`accessModifier '${json.accessModifier}' connot be accepted`);
+    }
+    if ('nonAccessModifiers' in json) {
+      if (Array.isArray(json.nonAccessModifiers)) {
+        parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, json.nonAccessModifiers);
+      } else {
+        QuickConsole.warnIgnoreField(this, 'nonAccessModifiers', Array);
       }
-      this.accessModifier = json.accessModifier as JavaAccessModifier;
     }
-    if ('nonAccessModifiers' in json && Array.isArray(json.nonAccessModifiers)) {
-      this.nonAccessModifiers.push(...json.nonAccessModifiers.map(nonAccessModifier => {
-        if (!isJavaNonAccessModifier(nonAccessModifier)) {
-          throw this.err(`nonAccessModifier '${nonAccessModifier}' cannot be accepted`);
-        }
-        return nonAccessModifier as JavaNonAccessModifier;
-      }));
+    if ('type' in json) {
+      if (typeof json.type === 'string') {
+        this.type = json.type;
+      } else {
+        throw J2JError.typeError(this, 'type', String);
+      }
+    } else {
+      throw J2JError.fieldNotDefined(this, 'type');
     }
-    if (!('type' in json) || typeof json.type !== 'string') {
-      throw this.err('requires a type');
-    }
-    this.type = json.type;
-    if ('value' in json && (json.value === null || typeof json.value === 'string')) {
-      this.value = json.value;
+    if ('value' in json) {
+      if (json.value === null || typeof json.value === 'string') {
+        this.value = json.value;
+      } else {
+        QuickConsole.warnIgnoreField('Attributes', 'value', [ null, String ]);
+      }
     }
   }
 

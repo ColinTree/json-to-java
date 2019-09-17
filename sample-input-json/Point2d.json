@@ -1,6 +1,6 @@
 {
   "reference": "https://www.cs.uic.edu/~sloan/CLASSES/java/Point2d.java",
-  "mainClass": {
+  "entry": {
     "name": "Point2d",
     "attributes": [
       { "accessModifier": "private", "type": "double", "name": "x" },

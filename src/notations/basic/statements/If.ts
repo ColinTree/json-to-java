@@ -1,6 +1,7 @@
-import { JsonObject } from '../../../utils/json';
-import { ConvertOptions } from '../../SingleFile';
-import { JavaStatementArray, JsonArrayToJavaStatement } from '../Statement';
+import J2JError from '../../../utils/J2JError';
+import { JsonArray, JsonObject, JsonUtil } from '../../../utils/json';
+import QuickConsole from '../../../utils/QuickConsole';
+import { JavaStatementArray, parseJavaStatements } from '../Statement';
 import JavaStatementBase from './Base';
 
 export default class JavaStatementIf extends JavaStatementBase {
@@ -8,20 +9,36 @@ export default class JavaStatementIf extends JavaStatementBase {
   private statements: JavaStatementArray = [];
   private else: JavaStatementIf | JavaStatementArray | null = null;
 
-  public constructor (convertOptions: ConvertOptions, currentIndent: number, json: JsonObject) {
-    super(convertOptions, currentIndent);
-    if (typeof json.condition !== 'string') {
-      throw new Error('Condition of JavaStatementIf should be a string');
+  public constructor (currentIndent: number, json: JsonObject) {
+    super(currentIndent);
+    this.nameWhenAsEmitter = 'If Statement';
+
+    if ('condotion' in json) {
+      if (typeof json.condition === 'string') {
+        this.condition = json.condition;
+      } else {
+        throw J2JError.typeError(this, 'condition', String);
+      }
+    } else {
+      throw J2JError.fieldNotDefined(this, 'condition');
     }
-    this.condition = json.condition;
-    if ('statements' in json && Array.isArray(json.statements)) {
-      this.statements.push(...JsonArrayToJavaStatement(json.statements, convertOptions, currentIndent + 1));
+    if ('statements' in json) {
+      if (JsonUtil.isJsonArray(json.statements)) {
+        parseJavaStatements(this.statements, json.statements as JsonArray, currentIndent + 1);
+      } else {
+        QuickConsole.warnIgnoreField(this, 'statements', Array);
+      }
     }
     if ('else' in json) {
-      if (Array.isArray(json.else)) {
-        this.else = JsonArrayToJavaStatement(json.else, convertOptions, currentIndent);
-      } else if (typeof json.else === 'object' && json.else !== null) {
-        this.else = new JavaStatementIf(convertOptions, currentIndent, json.else);
+      if (JsonUtil.isJsonArray(json.else)) {
+        this.else = [];
+        parseJavaStatements(this.else, json.else as JsonArray, currentIndent);
+      } else
+      if (JsonUtil.isJsonObject(json.else)) {
+        this.else = new JavaStatementIf(currentIndent, json.else as JsonObject);
+      } else {
+        // neither JsonObject nor JsonArray, unrecognizable type
+        QuickConsole.warnIgnoreField(this, 'else', [ Array, Object ]);
       }
     }
   }

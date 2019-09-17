@@ -1,6 +1,6 @@
 {
   "reference": "https://www.cs.uic.edu/~sloan/CLASSES/java/ArrayDemo.java",
-  "mainClass": {
+  "entry": {
     "name": "ArrayDemo",
     "accessModifier": "public",
     "methods": [
