@@ -41,12 +41,12 @@ export default class Console {
   }
 
   public static error (emitter: any, err: any) {
+    if (!(err instanceof Error)) {
+      err = new J2JError(null, err);
+    }
     if (this.ERROR_INTERCEPTOR) {
       this.ERROR_INTERCEPTOR(emitter, err);
     } else {
-      if (!(err instanceof Error)) {
-        err = new J2JError(null, err);
-      }
       console.error(err);
       console.error(`[ J2J ][ Error ]${this.stringifyEmitter(emitter)}`, 'An error had occured:', err.message);
     }
