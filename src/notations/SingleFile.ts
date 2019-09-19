@@ -1,5 +1,5 @@
 import J2JError from '../utils/J2JError';
-import { JsonObject, JsonUtil } from '../utils/json';
+import { JsonArray, JsonObject, JsonUtil } from '../utils/json';
 import QuickConsole from '../utils/QuickConsole';
 import JavaClass from './Class';
 
@@ -59,7 +59,8 @@ export default class JavaSingleFile {
       }
     }
     if ('imports' in json) {
-      if (Array.isArray(json.imports)) {
+      if (JsonUtil.isJsonArray(json.imports)) {
+        json.imports = json.imports as JsonArray;
         const length = json.imports.length;
         json.imports.forEach((importElement, index) => {
           if (typeof importElement !== 'string') {

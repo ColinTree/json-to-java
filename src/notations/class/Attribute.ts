@@ -34,7 +34,8 @@ export default class JavaClassAttribute extends JavaBaseWithName {
       }
     }
     if ('nonAccessModifiers' in json) {
-      if (Array.isArray(json.nonAccessModifiers)) {
+      if (JsonUtil.isJsonArray(json.nonAccessModifiers)) {
+        json.nonAccessModifiers = json.nonAccessModifiers as JsonArray;
         parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, json.nonAccessModifiers);
       } else {
         QuickConsole.warnIgnoreField(this, 'nonAccessModifiers', Array);

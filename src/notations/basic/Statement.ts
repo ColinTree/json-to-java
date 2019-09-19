@@ -1,5 +1,5 @@
 import J2JError from '../../utils/J2JError';
-import { JsonArray } from '../../utils/json';
+import { JsonArray, JsonObject, JsonUtil } from '../../utils/json';
 import JavaStatementBase from './statements/Base';
 import JavaStatementIf from './statements/If';
 import JavaStatementWhile from './statements/While';
@@ -13,11 +13,13 @@ export function parseJavaStatements (receiver: JavaStatement[], statementJson: J
   statementJson.forEach((statementItem, index) => {
     if (typeof statementItem === 'string') {
       receiver.push(statementItem);
-    } else if (Array.isArray(statementItem)) {
+    } else if (JsonUtil.isJsonArray(statementItem)) {
+      statementItem = statementItem as JsonArray;
       const subReceiver = [] as JavaStatement[];
       parseJavaStatements(subReceiver, statementItem, currentIndent + 1);
       receiver.push(subReceiver);
-    } else if (typeof statementItem === 'object' && statementItem !== null) {
+    } else if (JsonUtil.isJsonObject(statementItem)) {
+      statementItem = statementItem as JsonObject;
       switch (statementItem.type) {
         case 'if': {
           receiver.push(new JavaStatementIf(currentIndent, statementItem));

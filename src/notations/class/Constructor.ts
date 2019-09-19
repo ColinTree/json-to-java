@@ -35,12 +35,14 @@ export default class JavaClassConstructor extends JavaBaseWithName {
       }
     }
     if ('arguments' in json) {
-      if (Array.isArray(json.arguments)) {
+      if (JsonUtil.isJsonArray(json.arguments)) {
+        json.arguments = json.arguments as JsonArray;
         parseVariableDifinitions(this, 'arguments', this.arguments, json.arguments, currentIndent);
       }
     }
     if ('statements' in json) {
-      if (Array.isArray(json.statements)) {
+      if (JsonUtil.isJsonArray(json.statements)) {
+        json.statements = json.statements as JsonArray;
         parseJavaStatements(this.statements, json.statements, currentIndent);
       } else {
         QuickConsole.warnIgnoreField(this, 'statements', Array);

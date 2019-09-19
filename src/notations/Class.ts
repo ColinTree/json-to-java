@@ -37,7 +37,8 @@ export default class JavaClass extends JavaBaseWithName {
     this.nameWhenAsEmitter = 'Class';
 
     if ('annotations' in json) {
-      if (Array.isArray(json.annotations)) {
+      if (JsonUtil.isJsonArray(json.annotations)) {
+        json.annotations = json.annotations as JsonArray;
         parseAnnotations(this, 'annotations', this.annotations, json.annotations, currentIndent);
       } else {
         QuickConsole.warnIgnoreField(this, 'annotations', Array);
@@ -51,7 +52,8 @@ export default class JavaClass extends JavaBaseWithName {
       }
     }
     if ('nonAccessModifiers' in json) {
-      if (Array.isArray(json.nonAccessModifiers)) {
+      if (JsonUtil.isJsonArray(json.nonAccessModifiers)) {
+        json.nonAccessModifiers = json.nonAccessModifiers as JsonArray;
         parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, json.nonAccessModifiers);
       } else {
         QuickConsole.warnIgnoreField(this, 'nonAccessModifiers', Array);
@@ -65,7 +67,8 @@ export default class JavaClass extends JavaBaseWithName {
       }
     }
     if ('implements' in json) {
-      if (Array.isArray(json.implements)) {
+      if (JsonUtil.isJsonArray(json.implements)) {
+        json.implements = json.implements as JsonArray;
         const length = json.implements.length;
         json.implements.forEach((implement, index) => {
           if (typeof implement === 'string') {
@@ -78,28 +81,32 @@ export default class JavaClass extends JavaBaseWithName {
       }
     }
     if ('attributes' in json) {
-      if (Array.isArray(json.attributes)) {
+      if (JsonUtil.isJsonArray(json.attributes)) {
+        json.attributes = json.attributes as JsonArray;
         parseAttributes(this, 'attributes', this.attributes, json.attributes, currentIndent);
       } else {
         QuickConsole.warnIgnoreField(this, 'attributes', Array);
       }
     }
     if ('constructors' in json) {
-      if (Array.isArray(json.constructors)) {
+      if (JsonUtil.isJsonArray(json.constructors)) {
+        json.constructors = json.constructors as JsonArray;
         parseConstructors(this, 'constructors', this.name, this.constructors, json.constructors, currentIndent + 1);
       } else {
         QuickConsole.warnIgnoreField(this, 'constructors', Array);
       }
     }
     if ('methods' in json) {
-      if (Array.isArray(json.methods)) {
+      if (JsonUtil.isJsonArray(json.methods)) {
+        json.methods = json.methods as JsonArray;
         parseMethods(this, 'methods', this.methods, json.methods, currentIndent + 1);
       } else {
         QuickConsole.warnIgnoreField(this, 'methods', Array);
       }
     }
     if ('classes' in json) {
-      if (Array.isArray(json.classes)) {
+      if (JsonUtil.isJsonArray(json.classes)) {
+        json.classes = json.classes as JsonArray;
         parseClasses(this, 'classes', this.classes, json.classes, currentIndent + 1);
       } else {
         QuickConsole.warnIgnoreField(this, 'classes', Array);
