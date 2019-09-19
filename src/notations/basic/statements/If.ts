@@ -13,7 +13,7 @@ export default class JavaStatementIf extends JavaStatementBase {
     super(currentIndent);
     this.nameWhenAsEmitter = 'If Statement';
 
-    if ('condotion' in json) {
+    if ('condition' in json) {
       if (typeof json.condition === 'string') {
         this.condition = json.condition;
       } else {
