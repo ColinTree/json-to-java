@@ -1,6 +1,6 @@
 {
   "name": "json-to-java",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "node module converting formatted json into java files",
   "scripts": {
     "lint": "tslint -p .",
