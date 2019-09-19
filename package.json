@@ -3,6 +3,7 @@
   "version": "1.2.0",
   "description": "node module converting formatted json into java files",
   "scripts": {
+    "lint": "tslint -p .",
     "prepare": "npm run rebuild",
     "build": "tsc -p .",
     "rebuild": "npm run clean && npm run build",
@@ -33,6 +34,6 @@
     "@types/fs-extra": "^8.0.0",
     "ts-node": "^8.3.0",
     "tslint": "^5.18.0",
-    "typescript": "^3.5.2"
+    "typescript": "^3.6.3"
   }
 }
