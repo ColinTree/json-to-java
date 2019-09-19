@@ -4,7 +4,8 @@
 
 - [json-to-java](#json-to-java)
   - [Table of content](#table-of-content)
-  - [how to use](#how-to-use)
+  - [how to use in shell](#how-to-use-in-shell)
+  - [how to use as node module](#how-to-use-as-node-module)
   - [scheme of source json](#scheme-of-source-json)
     - [ConvertOptions](#convertoptions)
     - [JavaClass](#javaclass)
@@ -15,7 +16,7 @@
     - [JavaVariableDifinition](#javavariabledifinition)
     - [JavaStatement](#javastatement)
 
-## how to use
+## how to use in shell
 
 ```shell
 $ json-to-java -s path/to/src.json -o path/to/output.java
@@ -29,12 +30,22 @@ $ json-to-java -s path/to/src.json -o path/to/output.java
 * --output (-o) path to output java file
   * default to `%arguemnt::src%.java`, e.g. `input.json.java`
 
+## how to use as node module
+
+New an Java notation instance, and get generated java via instance.toString()
+
+You may need to configure `ConvertOptions`
+
 ## scheme of source json
 
 Sample file see in directory `sample-input-json`
 
 Should be a JsonObject
 
+* `fileDescription`
+  * comments at the top of the file
+  * optional, default to null
+  * **Accept type**: `null`, `string`, `string[]`, `JsonObject({ [key: string]: string })`
 * `convertOptions`
   * optional, default to empty object
   * **Accept type**: [ConvertOptions](#ConvertOptions)
