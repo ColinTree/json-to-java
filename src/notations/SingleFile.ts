@@ -1,6 +1,7 @@
 import J2JError from '../utils/J2JError';
 import { JsonArray, JsonObject, JsonUtil } from '../utils/json';
 import QuickConsole from '../utils/QuickConsole';
+import { StringKeyValuePair } from '../utils/StringKeyValuePair';
 import JavaClass from './Class';
 
 interface ConvertOptions {
@@ -17,6 +18,7 @@ export default class JavaSingleFile {
 
   public readonly nameWhenAsEmitter: string;
 
+  public readonly fileDescription: null | string | string[] | StringKeyValuePair = null ;
   public readonly package: string = '';
   public readonly imports: string[] = [];
   public readonly entryType: 'class' = 'class';
@@ -49,6 +51,36 @@ export default class JavaSingleFile {
         }
       } else {
         QuickConsole.warnIgnoreField(this, 'convertOptions', Object);
+      }
+    }
+    if ('fileDescription' in json) {
+      if (json.fileDescription === null) {
+        this.fileDescription = null;
+      } else if (typeof json.fileDescription === 'string') {
+        this.fileDescription = json.fileDescription;
+      } else if (JsonUtil.isJsonObject(json.fileDescription)) {
+        const values = json.fileDescription as JsonObject;
+        const newValues = {} as StringKeyValuePair;
+        Object.keys(values).forEach(key => {
+          let value = values[key];
+          if (typeof value !== 'string') {
+            QuickConsole.warnValueTypeOfKey(this, 'fileDescription', key, String);
+            value = String(value);
+          }
+          newValues[key] = value;
+        });
+        this.fileDescription = newValues;
+      } else if (JsonUtil.isJsonArray(json.fileDescription)) {
+        json. fileDescription = json.fileDescription as JsonArray;
+        this.fileDescription = [];
+        json.fileDescription.forEach((description, index) => {
+          if (typeof description !== 'string') {
+            QuickConsole.warnElementType(this, 'fileDescription', index, length, String);
+          }
+          (this.fileDescription as string[]).push(String(description));
+        });
+      } else {
+        QuickConsole.warnIgnoreField(this, 'fileDescription', [ null, String, Object, Array ]);
       }
     }
     if ('package' in json) {
@@ -117,7 +149,7 @@ export default class JavaSingleFile {
   }
 
   public toString () {
-    return '' +
+    return this.formatFileDescription() +
       (this.package.length > 0 ? `package ${this.package};\n` : '') +
 
       (this.imports.length > 0
@@ -125,5 +157,27 @@ export default class JavaSingleFile {
         : '') +
 
       `${this.entry}\n`;
+  }
+
+  private formatFileDescription () {
+    let fileDescription = this.fileDescription;
+    if (fileDescription === null) {
+      return '';
+    }
+    if (typeof fileDescription === 'string') {
+      fileDescription = [ fileDescription ];
+    }
+    let rtn = '/**\n';
+    if (Array.isArray(fileDescription)) {
+      fileDescription.forEach(description => {
+        rtn += ` * ${description}\n`;
+      });
+    } else {
+      Object.keys(fileDescription).forEach(key => {
+        rtn += ` * ${key}: ${(fileDescription as StringKeyValuePair)[key]}\n`;
+      });
+    }
+    rtn += ' */\n';
+    return rtn;
   }
 }

@@ -1,5 +1,7 @@
 {
-  "reference": "https://www.cs.uic.edu/~sloan/CLASSES/java/ArrayDemo.java",
+  "fileDescription": {
+    "reference": "https://www.cs.uic.edu/~sloan/CLASSES/java/ArrayDemo.java"
+  },
   "entry": {
     "name": "ArrayDemo",
     "accessModifier": "public",

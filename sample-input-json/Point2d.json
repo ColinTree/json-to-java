@@ -1,5 +1,7 @@
 {
-  "reference": "https://www.cs.uic.edu/~sloan/CLASSES/java/Point2d.java",
+  "fileDescription": {
+    "reference": "https://www.cs.uic.edu/~sloan/CLASSES/java/Point2d.java"
+  },
   "entry": {
     "name": "Point2d",
     "attributes": [

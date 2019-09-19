@@ -112,7 +112,7 @@ Should be a JsonObject
   * **Accept value/types**
     * `null`: no values, as *MarkerAnnotation*
     * `string`: represent to a single value, as *SingleValueAnnotation*
-    * `{ [key: string]: string }`: represent to key-value pairs, as FullAnnotation
+    * `StringKeyValuePair`: represent to key-value pairs, as FullAnnotation
 
 ### JavaClassAttributes
 
