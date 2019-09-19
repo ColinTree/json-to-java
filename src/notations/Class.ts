@@ -5,7 +5,7 @@ import JavaAnnotation, { parseAnnotations } from './Annotation';
 import JavaBaseWithName from './BaseWithName';
 import { isJavaAccessModifier, JavaAccessModifier,
   JavaNonAccessModifier, parseNonAccessModifiers } from './basic/Modifier';
-import JavaClassAttribute, { parseAttributes } from './class/Attributes';
+import JavaClassAttribute, { parseAttributes } from './class/Attribute';
 import JavaClassConstructor, { parseConstructors } from './class/Constructor';
 import JavaClassMethod, { parseMethods } from './class/Method';
 
