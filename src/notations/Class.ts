@@ -72,9 +72,10 @@ export default class JavaClass extends JavaBaseWithName {
         const length = json.implements.length;
         json.implements.forEach((implement, index) => {
           if (typeof implement === 'string') {
+            this.implements.push(String(implement));
+          } else {
             QuickConsole.warnElementType(this, 'implements', index, length, String);
           }
-          this.implements.push(String(implement));
         });
       } else {
         json.implements = [ json.implements ];
@@ -83,7 +84,7 @@ export default class JavaClass extends JavaBaseWithName {
     if ('attributes' in json) {
       if (JsonUtil.isJsonArray(json.attributes)) {
         json.attributes = json.attributes as JsonArray;
-        parseAttributes(this, 'attributes', this.attributes, json.attributes, currentIndent);
+        parseAttributes(this, 'attributes', this.attributes, json.attributes, currentIndent + 1);
       } else {
         QuickConsole.warnIgnoreField(this, 'attributes', Array);
       }
