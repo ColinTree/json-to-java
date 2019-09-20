@@ -1,16 +1,9 @@
+import { globalConvertOptions } from '../utils/ConvertOptions';
 import J2JError from '../utils/J2JError';
 import { JsonArray, JsonObject, JsonUtil } from '../utils/json';
 import QuickConsole from '../utils/QuickConsole';
 import { StringKeyValuePair } from '../utils/StringKeyValuePair';
 import JavaClass from './Class';
-
-interface ConvertOptions {
-  indent: string;
-}
-function defaultConvertOptions (): ConvertOptions {
-  return { indent: '    ' };
-}
-export const globalConvertOptions: ConvertOptions = defaultConvertOptions();
 
 export default class JavaSingleFile {
 

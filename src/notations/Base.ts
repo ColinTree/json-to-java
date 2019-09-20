@@ -1,4 +1,4 @@
-import { globalConvertOptions } from './SingleFile';
+import { globalConvertOptions } from '../utils/ConvertOptions';
 
 export default abstract class JavaBase {
   public nameWhenAsEmitter: string;
