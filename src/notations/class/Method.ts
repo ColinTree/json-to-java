@@ -12,7 +12,7 @@ export function parseMethods (
     emitter: any, fieldName: string, receiver: JavaClassMethod[], methodJson: JsonArray, currentIndent: number) {
   methodJson.forEach((attribute, index) => {
     if (JsonUtil.isJsonObject(attribute)) {
-      receiver.push(new JavaClassMethod(currentIndent + 1, attribute as JsonObject));
+      receiver.push(new JavaClassMethod(currentIndent, attribute as JsonObject));
     } else {
       throw J2JError.elementTypeError(emitter, fieldName, index, methodJson.length, Object);
     }

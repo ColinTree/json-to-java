@@ -13,7 +13,7 @@ export function parseClasses (
     emitter: any, fieldName: string, receiver: JavaClass[], classJson: JsonArray, currentIndent: number) {
   classJson.forEach((claz, index) => {
     if (JsonUtil.isJsonObject(claz)) {
-      receiver.push(new JavaClass(currentIndent + 1, claz as JsonObject));
+      receiver.push(new JavaClass(currentIndent, claz as JsonObject));
     } else {
       throw J2JError.elementTypeError(emitter, fieldName, index, classJson.length, Object);
     }

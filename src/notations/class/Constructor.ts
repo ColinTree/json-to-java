@@ -11,7 +11,7 @@ export function parseConstructors (
     constructorJson: JsonArray, currentIndent: number) {
   constructorJson.forEach((attribute, index) => {
     if (JsonUtil.isJsonObject(attribute)) {
-      receiver.push(new JavaClassConstructor(currentIndent + 1, className, attribute as JsonObject));
+      receiver.push(new JavaClassConstructor(currentIndent, className, attribute as JsonObject));
     } else {
       throw J2JError.elementTypeError(emitter, fieldName, index, constructorJson.length, Object);
     }

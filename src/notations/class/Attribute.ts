@@ -9,7 +9,7 @@ export function parseAttributes (
     emitter: any, fieldName: string, receiver: JavaClassAttribute[], attributeJson: JsonArray, currentIndent: number) {
   attributeJson.forEach((attribute, index) => {
     if (JsonUtil.isJsonObject(attribute)) {
-      receiver.push(new JavaClassAttribute(currentIndent + 1, attribute as JsonObject));
+      receiver.push(new JavaClassAttribute(currentIndent, attribute as JsonObject));
     } else {
       throw J2JError.elementTypeError(emitter, fieldName, index, attributeJson.length, Object);
     }
