@@ -12,7 +12,7 @@ export function parseMethods (
     emitter: any, fieldName: string, receiver: JavaClassMethod[], methodJson: JsonArray, currentIndent: number) {
   methodJson.forEach((attribute, index) => {
     if (JsonUtil.isJsonObject(attribute)) {
-      receiver.push(new JavaClassMethod(currentIndent, attribute as JsonObject));
+      receiver.push(new JavaClassMethod(currentIndent, attribute));
     } else {
       throw J2JError.elementTypeError(emitter, fieldName, index, methodJson.length, Object);
     }
@@ -33,7 +33,6 @@ export default class JavaClassMethod extends JavaBaseWithName {
 
     if ('annotations' in json) {
       if (JsonUtil.isJsonArray(json.annotations)) {
-        json.annotations = json.annotations as JsonArray;
         parseAnnotations(this, 'annotations', this.annotations, json.annotations, currentIndent);
       } else {
         QuickConsole.warnIgnoreField(this, 'annotations', Array);
@@ -48,7 +47,6 @@ export default class JavaClassMethod extends JavaBaseWithName {
     }
     if ('nonAccessModifiers' in json) {
       if (JsonUtil.isJsonArray(json.nonAccessModifiers)) {
-        json.nonAccessModifiers = json.nonAccessModifiers as JsonArray;
         parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, json.nonAccessModifiers);
       } else {
         QuickConsole.warnIgnoreField(this, 'nonAccessModifiers', Array);
@@ -63,13 +61,11 @@ export default class JavaClassMethod extends JavaBaseWithName {
     }
     if ('arguments' in json) {
       if (JsonUtil.isJsonArray(json.arguments)) {
-        json.arguments = json.arguments as JsonArray;
         parseVariableDifinitions(this, 'arguments', this.arguments, json.arguments, currentIndent);
       }
     }
     if ('statements' in json) {
       if (JsonUtil.isJsonArray(json.statements)) {
-        json.statements = json.statements as JsonArray;
         parseJavaStatements(this.statements, json.statements, currentIndent);
       } else {
         QuickConsole.warnIgnoreField(this, 'statements', Array);

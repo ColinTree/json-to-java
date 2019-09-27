@@ -1,5 +1,5 @@
 import J2JError from '../../../utils/J2JError';
-import { JsonArray, JsonObject, JsonUtil } from '../../../utils/json';
+import { JsonObject, JsonUtil } from '../../../utils/json';
 import QuickConsole from '../../../utils/QuickConsole';
 import { JavaStatementArray, parseJavaStatements } from '../Statement';
 import JavaStatementBase from './Base';
@@ -24,7 +24,7 @@ export default class JavaStatementIf extends JavaStatementBase {
     }
     if ('statements' in json) {
       if (JsonUtil.isJsonArray(json.statements)) {
-        parseJavaStatements(this.statements, json.statements as JsonArray, currentIndent + 1);
+        parseJavaStatements(this.statements, json.statements, currentIndent + 1);
       } else {
         QuickConsole.warnIgnoreField(this, 'statements', Array);
       }
@@ -32,10 +32,10 @@ export default class JavaStatementIf extends JavaStatementBase {
     if ('else' in json) {
       if (JsonUtil.isJsonArray(json.else)) {
         this.else = [];
-        parseJavaStatements(this.else, json.else as JsonArray, currentIndent);
+        parseJavaStatements(this.else, json.else, currentIndent);
       } else
       if (JsonUtil.isJsonObject(json.else)) {
-        this.else = new JavaStatementIf(currentIndent, json.else as JsonObject);
+        this.else = new JavaStatementIf(currentIndent, json.else);
       } else {
         // neither JsonObject nor JsonArray, unrecognizable type
         QuickConsole.warnIgnoreField(this, 'else', [ Array, Object ]);

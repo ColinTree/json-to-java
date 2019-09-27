@@ -8,7 +8,7 @@ export function parseAnnotations (
     emitter: any, fieldName: string, receiver: JavaAnnotation[], annotationJson: JsonArray, currentIndent: number) {
   annotationJson.forEach((annotation, index) => {
     if (JsonUtil.isJsonObject(annotation)) {
-      receiver.push(new JavaAnnotation(currentIndent, annotation as JsonObject));
+      receiver.push(new JavaAnnotation(currentIndent, annotation));
     } else {
       throw J2JError.elementTypeError(emitter, fieldName, index, annotationJson.length, Object);
     }
@@ -26,7 +26,7 @@ export default class JavaAnnotation extends JavaBaseWithName {
       if (typeof json.values === 'string') {
         this.values = json.values;
       } else if (JsonUtil.isJsonObject(json.values)) {
-        const values = json.values as JsonObject;
+        const values = json.values;
         const newValues = {} as StringKeyValuePair;
         Object.keys(values).forEach(key => {
           let value = values[key];

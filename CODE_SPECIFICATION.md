@@ -16,6 +16,5 @@ When handling a field:
 When checking a json type:
 
 * Use `JsonUtil.isJsonObject` && `JsonUtil.isJsonArray` instead of `typeof` or `Array.isArray`
-* Use `variableName as JsonArray/JsonObject` for a checked value
 
 (Other see `tslint.json`)

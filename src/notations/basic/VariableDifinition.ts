@@ -7,10 +7,11 @@ export function parseVariableDifinitions (
     emitter: any, fieldName: string, receiver: JavaVariableDifinition[], argumentJson: JsonArray,
     currentIndent: number) {
   argumentJson.forEach((argument, index) => {
-    if (!JsonUtil.isJsonObject(argument)) {
+    if (JsonUtil.isJsonObject(argument)) {
+      receiver.push(new JavaVariableDifinition(currentIndent, argument));
+    } else {
       throw J2JError.elementTypeError(emitter, fieldName, index, length, Object);
     }
-    receiver.push(new JavaVariableDifinition(currentIndent, argument as JsonObject));
   });
 }
 

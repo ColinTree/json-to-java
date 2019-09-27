@@ -11,7 +11,7 @@ export function parseConstructors (
     constructorJson: JsonArray, currentIndent: number) {
   constructorJson.forEach((attribute, index) => {
     if (JsonUtil.isJsonObject(attribute)) {
-      receiver.push(new JavaClassConstructor(currentIndent, className, attribute as JsonObject));
+      receiver.push(new JavaClassConstructor(currentIndent, className, attribute));
     } else {
       throw J2JError.elementTypeError(emitter, fieldName, index, constructorJson.length, Object);
     }
@@ -36,13 +36,11 @@ export default class JavaClassConstructor extends JavaBaseWithName {
     }
     if ('arguments' in json) {
       if (JsonUtil.isJsonArray(json.arguments)) {
-        json.arguments = json.arguments as JsonArray;
         parseVariableDifinitions(this, 'arguments', this.arguments, json.arguments, currentIndent);
       }
     }
     if ('statements' in json) {
       if (JsonUtil.isJsonArray(json.statements)) {
-        json.statements = json.statements as JsonArray;
         parseJavaStatements(this.statements, json.statements, currentIndent);
       } else {
         QuickConsole.warnIgnoreField(this, 'statements', Array);

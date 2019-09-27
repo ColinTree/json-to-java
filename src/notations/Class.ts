@@ -13,7 +13,7 @@ export function parseClasses (
     emitter: any, fieldName: string, receiver: JavaClass[], classJson: JsonArray, currentIndent: number) {
   classJson.forEach((claz, index) => {
     if (JsonUtil.isJsonObject(claz)) {
-      receiver.push(new JavaClass(currentIndent, claz as JsonObject));
+      receiver.push(new JavaClass(currentIndent, claz));
     } else {
       throw J2JError.elementTypeError(emitter, fieldName, index, classJson.length, Object);
     }
@@ -38,7 +38,6 @@ export default class JavaClass extends JavaBaseWithName {
 
     if ('annotations' in json) {
       if (JsonUtil.isJsonArray(json.annotations)) {
-        json.annotations = json.annotations as JsonArray;
         parseAnnotations(this, 'annotations', this.annotations, json.annotations, currentIndent);
       } else {
         QuickConsole.warnIgnoreField(this, 'annotations', Array);
@@ -53,7 +52,6 @@ export default class JavaClass extends JavaBaseWithName {
     }
     if ('nonAccessModifiers' in json) {
       if (JsonUtil.isJsonArray(json.nonAccessModifiers)) {
-        json.nonAccessModifiers = json.nonAccessModifiers as JsonArray;
         parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, json.nonAccessModifiers);
       } else {
         QuickConsole.warnIgnoreField(this, 'nonAccessModifiers', Array);
@@ -68,7 +66,6 @@ export default class JavaClass extends JavaBaseWithName {
     }
     if ('implements' in json) {
       if (JsonUtil.isJsonArray(json.implements)) {
-        json.implements = json.implements as JsonArray;
         const length = json.implements.length;
         json.implements.forEach((implement, index) => {
           if (typeof implement === 'string') {
@@ -83,7 +80,6 @@ export default class JavaClass extends JavaBaseWithName {
     }
     if ('attributes' in json) {
       if (JsonUtil.isJsonArray(json.attributes)) {
-        json.attributes = json.attributes as JsonArray;
         parseAttributes(this, 'attributes', this.attributes, json.attributes, currentIndent + 1);
       } else {
         QuickConsole.warnIgnoreField(this, 'attributes', Array);
@@ -91,7 +87,6 @@ export default class JavaClass extends JavaBaseWithName {
     }
     if ('constructors' in json) {
       if (JsonUtil.isJsonArray(json.constructors)) {
-        json.constructors = json.constructors as JsonArray;
         parseConstructors(this, 'constructors', this.name, this.constructors, json.constructors, currentIndent + 1);
       } else {
         QuickConsole.warnIgnoreField(this, 'constructors', Array);
@@ -99,7 +94,6 @@ export default class JavaClass extends JavaBaseWithName {
     }
     if ('methods' in json) {
       if (JsonUtil.isJsonArray(json.methods)) {
-        json.methods = json.methods as JsonArray;
         parseMethods(this, 'methods', this.methods, json.methods, currentIndent + 1);
       } else {
         QuickConsole.warnIgnoreField(this, 'methods', Array);
@@ -107,7 +101,6 @@ export default class JavaClass extends JavaBaseWithName {
     }
     if ('classes' in json) {
       if (JsonUtil.isJsonArray(json.classes)) {
-        json.classes = json.classes as JsonArray;
         parseClasses(this, 'classes', this.classes, json.classes, currentIndent + 1);
       } else {
         QuickConsole.warnIgnoreField(this, 'classes', Array);

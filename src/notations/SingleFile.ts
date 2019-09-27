@@ -1,6 +1,6 @@
 import { globalConvertOptions } from '../utils/ConvertOptions';
 import J2JError from '../utils/J2JError';
-import { JsonArray, JsonObject, JsonUtil } from '../utils/json';
+import { JsonObject, JsonUtil } from '../utils/json';
 import QuickConsole from '../utils/QuickConsole';
 import { StringKeyValuePair } from '../utils/StringKeyValuePair';
 import JavaClass from './Class';
@@ -33,11 +33,10 @@ export default class JavaSingleFile {
     }
     if ('convertOptions' in json) {
       if (JsonUtil.isJsonObject(json.convertOptions)) {
-        const convertOptions = json.convertOptions as JsonObject;
-        if ('indent' in convertOptions) {
-          if (typeof convertOptions.indent === 'number') {
-            globalConvertOptions.indent = ' '.repeat(convertOptions.indent);
-          } else if (convertOptions.indent === 'tab') {
+        if ('indent' in json.convertOptions) {
+          if (typeof json.convertOptions.indent === 'number') {
+            globalConvertOptions.indent = ' '.repeat(json.convertOptions.indent);
+          } else if (json.convertOptions.indent === 'tab') {
             globalConvertOptions.indent = '\t';
           } else {
             QuickConsole.warnIgnoreField(this, 'convertOptions.indent', [ Number, 'string "tab"' ]);
@@ -51,7 +50,7 @@ export default class JavaSingleFile {
       if (typeof json.fileDescription === 'string') {
         this.fileDescription = [ this.DEFAULT_DESCRIPTION_MSG, json.fileDescription ];
       } else if (JsonUtil.isJsonObject(json.fileDescription)) {
-        const values = json.fileDescription as JsonObject;
+        const values = json.fileDescription;
         const newValues = {} as StringKeyValuePair;
         newValues['~INFO~'] = this.DEFAULT_DESCRIPTION_MSG;
         Object.keys(values).forEach(key => {
@@ -64,7 +63,6 @@ export default class JavaSingleFile {
         });
         this.fileDescription = newValues;
       } else if (JsonUtil.isJsonArray(json.fileDescription)) {
-        json.fileDescription = json.fileDescription as JsonArray;
         this.fileDescription = [ this.DEFAULT_DESCRIPTION_MSG ];
         json.fileDescription.forEach((description, index) => {
           if (typeof description !== 'string') {
@@ -73,7 +71,7 @@ export default class JavaSingleFile {
           (this.fileDescription as string[]).push(String(description));
         });
       } else {
-        QuickConsole.warnIgnoreField(this, 'fileDescription', [ null, String, Object, Array ]);
+        QuickConsole.warnIgnoreField(this, 'fileDescription', [ String, Object, Array ]);
       }
     }
     if ('package' in json) {
@@ -85,7 +83,6 @@ export default class JavaSingleFile {
     }
     if ('imports' in json) {
       if (JsonUtil.isJsonArray(json.imports)) {
-        json.imports = json.imports as JsonArray;
         const length = json.imports.length;
         json.imports.forEach((importElement, index) => {
           if (typeof importElement !== 'string') {
@@ -123,7 +120,7 @@ export default class JavaSingleFile {
       if (JsonUtil.isJsonObject(json.entry)) {
         switch (this.entryType) {
           case 'class':
-            this.entry = new JavaClass(0, json.entry as JsonObject);
+            this.entry = new JavaClass(0, json.entry);
             break;
           default:
             // impossible since type is checked above as field

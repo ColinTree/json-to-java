@@ -1,5 +1,5 @@
 import J2JError from '../../../utils/J2JError';
-import { JsonArray, JsonObject, JsonUtil } from '../../../utils/json';
+import { JsonObject, JsonUtil } from '../../../utils/json';
 import QuickConsole from '../../../utils/QuickConsole';
 import { JavaStatementArray, parseJavaStatements } from '../Statement';
 import JavaStatementBase from './Base';
@@ -23,7 +23,6 @@ export default class JavaStatementWhile extends JavaStatementBase {
     }
     if ('statements' in json) {
       if (JsonUtil.isJsonArray(json.statements)) {
-        json.statements = json.statements as JsonArray;
         parseJavaStatements(this.statements, json.statements, currentIndent + 1);
       } else {
         QuickConsole.warnIgnoreField('while', 'statements', Array);

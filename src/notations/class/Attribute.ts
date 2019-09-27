@@ -9,7 +9,7 @@ export function parseAttributes (
     emitter: any, fieldName: string, receiver: JavaClassAttribute[], attributeJson: JsonArray, currentIndent: number) {
   attributeJson.forEach((attribute, index) => {
     if (JsonUtil.isJsonObject(attribute)) {
-      receiver.push(new JavaClassAttribute(currentIndent, attribute as JsonObject));
+      receiver.push(new JavaClassAttribute(currentIndent, attribute));
     } else {
       throw J2JError.elementTypeError(emitter, fieldName, index, attributeJson.length, Object);
     }
@@ -35,7 +35,6 @@ export default class JavaClassAttribute extends JavaBaseWithName {
     }
     if ('nonAccessModifiers' in json) {
       if (JsonUtil.isJsonArray(json.nonAccessModifiers)) {
-        json.nonAccessModifiers = json.nonAccessModifiers as JsonArray;
         parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, json.nonAccessModifiers);
       } else {
         QuickConsole.warnIgnoreField(this, 'nonAccessModifiers', Array);
