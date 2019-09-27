@@ -66,16 +66,14 @@ export default class JavaClass extends JavaBaseWithName {
     }
     if ('implements' in json) {
       if (JsonUtil.isJsonArray(json.implements)) {
-        const length = json.implements.length;
-        json.implements.forEach((implement, index) => {
-          if (typeof implement === 'string') {
-            this.implements.push(String(implement));
-          } else {
-            QuickConsole.warnElementType(this, 'implements', index, length, String);
+        this.implements = json.implements.map((implement, index, impls) => {
+          if (typeof implement !== 'string') {
+            QuickConsole.warnElementType(this, 'implements', index, impls.length, String);
           }
+          return String(implement);
         });
       } else {
-        json.implements = [ json.implements ];
+        this.implements = [ String(json.implements) ];
       }
     }
     if ('attributes' in json) {

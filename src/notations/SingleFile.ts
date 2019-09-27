@@ -53,21 +53,20 @@ export default class JavaSingleFile {
         this.fileDescription = Lodash.merge(
           { '~INFO~': this.DEFAULT_DESCRIPTION_MSG },
           Lodash.mapValues(json.fileDescription, (value, key) => {
-            if (typeof value === 'string') {
-              return value;
-            } else {
+            if (typeof value !== 'string') {
               QuickConsole.warnValueTypeOfKey(this, 'fileDescription', key, String);
-              return String(value);
             }
+            return String(value);
           }));
       } else if (JsonUtil.isJsonArray(json.fileDescription)) {
-        this.fileDescription = [ this.DEFAULT_DESCRIPTION_MSG ];
-        json.fileDescription.forEach((description, index) => {
-          if (typeof description !== 'string') {
-            QuickConsole.warnElementType(this, 'fileDescription', index, length, String);
-          }
-          (this.fileDescription as string[]).push(String(description));
-        });
+        this.fileDescription = Lodash.concat(
+          [ this.DEFAULT_DESCRIPTION_MSG ],
+          json.fileDescription.map((description, index) => {
+            if (typeof description !== 'string') {
+              QuickConsole.warnElementType(this, 'fileDescription', index, length, String);
+            }
+            return String(description);
+          }));
       } else {
         QuickConsole.warnIgnoreField(this, 'fileDescription', [ String, Object, Array ]);
       }
@@ -81,12 +80,11 @@ export default class JavaSingleFile {
     }
     if ('imports' in json) {
       if (JsonUtil.isJsonArray(json.imports)) {
-        const length = json.imports.length;
-        json.imports.forEach((importElement, index) => {
+        this.imports = json.imports.map((importElement, index, imports) => {
           if (typeof importElement !== 'string') {
-            QuickConsole.warnElementType(this, 'imports', index, length, String);
+            QuickConsole.warnElementType(this, 'imports', index, imports.length, String);
           }
-          this.imports.push(String(importElement));
+          return String(importElement);
         });
       } else {
         QuickConsole.warnIgnoreField(this, 'imports', Array);
