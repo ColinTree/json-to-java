@@ -1,8 +1,8 @@
+import { Dictionary } from 'lodash';
 import { globalConvertOptions } from '../utils/ConvertOptions';
 import J2JError from '../utils/J2JError';
 import { JsonObject, JsonUtil } from '../utils/json';
 import QuickConsole from '../utils/QuickConsole';
-import { StringKeyValuePair } from '../utils/StringKeyValuePair';
 import JavaClass from './Class';
 
 export default class JavaSingleFile {
@@ -12,7 +12,7 @@ export default class JavaSingleFile {
 
   public readonly nameWhenAsEmitter: string;
 
-  public readonly fileDescription: string[] | StringKeyValuePair = [ this.DEFAULT_DESCRIPTION_MSG ];
+  public readonly fileDescription: string[] | Dictionary<string> = [ this.DEFAULT_DESCRIPTION_MSG ];
   public readonly package: string = '';
   public readonly imports: string[] = [];
   public readonly entryType: 'class' = 'class';
@@ -51,7 +51,7 @@ export default class JavaSingleFile {
         this.fileDescription = [ this.DEFAULT_DESCRIPTION_MSG, json.fileDescription ];
       } else if (JsonUtil.isJsonObject(json.fileDescription)) {
         const values = json.fileDescription;
-        const newValues = {} as StringKeyValuePair;
+        const newValues = {} as Dictionary<string>;
         newValues['~INFO~'] = this.DEFAULT_DESCRIPTION_MSG;
         Object.keys(values).forEach(key => {
           let value = values[key];
@@ -164,7 +164,7 @@ export default class JavaSingleFile {
       });
     } else {
       Object.keys(fileDescription).forEach(key => {
-        rtn += ` * ${key}: ${(fileDescription as StringKeyValuePair)[key]}\n`;
+        rtn += ` * ${key}: ${(fileDescription as Dictionary<string>)[key]}\n`;
       });
     }
     rtn += ' */\n';

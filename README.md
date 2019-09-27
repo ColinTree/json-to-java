@@ -45,7 +45,7 @@ Should be a JsonObject
 * `fileDescription`
   * comments at the top of the file
   * optional, default to null
-  * **Accept type**: `null`, `string`, `string[]`, `JsonObject({ [key: string]: string })`
+  * **Accept type**: `null`, `string`, `string[]`, `JsonObject(Dictionary<string>)`
 * `convertOptions`
   * optional, default to empty object
   * **Accept type**: [ConvertOptions](#ConvertOptions)
@@ -123,7 +123,7 @@ Should be a JsonObject
   * **Accept value/types**
     * `null`: no values, as *MarkerAnnotation*
     * `string`: represent to a single value, as *SingleValueAnnotation*
-    * `StringKeyValuePair`: represent to key-value pairs, as FullAnnotation
+    * `Dictionary<string>`: represent to key-value pairs, as FullAnnotation
 
 ### JavaClassAttributes
 
