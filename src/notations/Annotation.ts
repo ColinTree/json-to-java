@@ -1,4 +1,4 @@
-import { Dictionary } from 'lodash';
+import Lodash, { Dictionary } from 'lodash';
 import J2JError from '../utils/J2JError';
 import { JsonArray, JsonObject, JsonUtil } from '../utils/json';
 import QuickConsole from '../utils/QuickConsole';
@@ -26,17 +26,13 @@ export default class JavaAnnotation extends JavaBaseWithName {
       if (typeof json.values === 'string') {
         this.values = json.values;
       } else if (JsonUtil.isJsonObject(json.values)) {
-        const values = json.values;
-        const newValues = {} as Dictionary<string>;
-        Object.keys(values).forEach(key => {
-          let value = values[key];
+        this.values = Lodash.mapValues(json.values, (value, key) => {
           if (typeof value !== 'string') {
             QuickConsole.warnValueTypeOfKey(this, 'values', key, String);
-            value = String(value);
+            return String(value);
           }
-          newValues[key] = value;
+          return value;
         });
-        this.values = newValues;
       } else {
         QuickConsole.warnIgnoreField(this, 'values', [ String, Object ]);
       }

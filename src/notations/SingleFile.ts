@@ -1,4 +1,4 @@
-import { Dictionary } from 'lodash';
+import Lodash, { Dictionary } from 'lodash';
 import { globalConvertOptions } from '../utils/ConvertOptions';
 import J2JError from '../utils/J2JError';
 import { JsonObject, JsonUtil } from '../utils/json';
@@ -50,18 +50,16 @@ export default class JavaSingleFile {
       if (typeof json.fileDescription === 'string') {
         this.fileDescription = [ this.DEFAULT_DESCRIPTION_MSG, json.fileDescription ];
       } else if (JsonUtil.isJsonObject(json.fileDescription)) {
-        const values = json.fileDescription;
-        const newValues = {} as Dictionary<string>;
-        newValues['~INFO~'] = this.DEFAULT_DESCRIPTION_MSG;
-        Object.keys(values).forEach(key => {
-          let value = values[key];
-          if (typeof value !== 'string') {
-            QuickConsole.warnValueTypeOfKey(this, 'fileDescription', key, String);
-            value = String(value);
-          }
-          newValues[key] = value;
-        });
-        this.fileDescription = newValues;
+        this.fileDescription = Lodash.merge(
+          { '~INFO~': this.DEFAULT_DESCRIPTION_MSG },
+          Lodash.mapValues(json.fileDescription, (value, key) => {
+            if (typeof value === 'string') {
+              return value;
+            } else {
+              QuickConsole.warnValueTypeOfKey(this, 'fileDescription', key, String);
+              return String(value);
+            }
+          }));
       } else if (JsonUtil.isJsonArray(json.fileDescription)) {
         this.fileDescription = [ this.DEFAULT_DESCRIPTION_MSG ];
         json.fileDescription.forEach((description, index) => {
@@ -163,8 +161,8 @@ export default class JavaSingleFile {
         rtn += ` * ${description}\n`;
       });
     } else {
-      Object.keys(fileDescription).forEach(key => {
-        rtn += ` * ${key}: ${(fileDescription as Dictionary<string>)[key]}\n`;
+      Lodash.forOwn(fileDescription, (value, key) => {
+        rtn += ` * ${key}: ${value}\n`;
       });
     }
     rtn += ' */\n';
