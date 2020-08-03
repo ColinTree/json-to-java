@@ -8,7 +8,7 @@
     "build": "tsc -p .",
     "rebuild": "npm run clean && npm run build",
     "clean": "rm -rf bin",
-    "dev": "ts-node src/NodeEntry.ts"
+    "dev": "ts-node src/cli-dev.ts"
   },
   "bin": {
     "json-to-java": "./cli.js"
