@@ -35,29 +35,47 @@ export function formatExpectations (expectations: Expectations) {
 
 export default class QuickConsole {
 
+  /**
+   * Warn field had been deprecated and what should be used instead
+   */
   public static warnDeprecated (emitter: any, fieldName: string, replacement: string) {
     Console.warn(emitter,
       `field '${fieldName}' is deprecated and may be removed in the future, please use '${replacement}' instead`);
   }
+  /**
+   * Warn field feature has been removed
+   */
   public static warnRemoved (emitter: any, fieldName: string) {
     Console.warn(emitter, `field '${fieldName}' had been removed in json-to-java scheme, and it will be ignored`);
   }
+  /**
+   * Warn field type/value issue and another value would be used instead
+   */
   public static warnTypeWithReplacement (
       emitter: any, fieldName: string, expectations: Expectations, replacement: string) {
     expectations = formatExpectations(expectations);
     replacement = replacement ? `value ${replacement}` : 'default value';
     Console.warn(emitter, `value of field '${fieldName}' ${expectations}, ${replacement} will be used`);
   }
+  /**
+   * Warn field type issue and its value would be ignored
+   */
   public static warnIgnoreField (emitter: any, fieldName: string, expectations: Expectations) {
     expectations = formatExpectations(expectations);
     Console.warn(emitter, `field '${fieldName}' will be ignored since its value ${expectations}`);
   }
+  /**
+   * Warn element type issue of an Array field
+   */
   public static warnElementType (
       emitter: any, fieldName: string, index: number, length: number, expectations: Expectations) {
     expectations = formatExpectations(expectations);
     Console.warn(emitter,
       `value of element ${index + 1}/${length} in field \'${fieldName}\' ${expectations}`);
   }
+  /**
+   * Warn key type issue in a key-value field
+   */
   public static warnValueTypeOfKey (
       emitter: any, fieldName: string, key: string, expectations: Expectations) {
     expectations = formatExpectations(expectations);
