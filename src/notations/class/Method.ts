@@ -81,8 +81,11 @@ export default class JavaClassMethod extends JavaBaseWithName {
       this.nonAccessModifiers.join(' ') + (this.nonAccessModifiers.length > 0 ? ' ' : '') +
       `${this.type} ` +
       `${this.name} ` +
-      `(${this.arguments.join(', ')}) {` +
-      JavaStatementToString(this.statements, depth => this.contentIndentString(depth)) +
-      `\n${this.currentIndentString}}`;
+      `(${this.arguments.join(', ')})` +
+      (this.nonAccessModifiers.includes('abstract')
+        ? ';'
+        : (` {${JavaStatementToString(this.statements, depth => this.contentIndentString(depth))}` +
+        `\n${this.currentIndentString}}`)
+      );
   }
 }
