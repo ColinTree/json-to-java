@@ -1,61 +1,45 @@
 import J2JError from '../utils/J2JError';
 import {JsonArray, JsonObject, JsonUtil} from '../utils/json';
 import QuickConsole from '../utils/QuickConsole';
-import JavaAnnotation, {parseAnnotations} from './Annotation';
-import {JavaNonAccessModifier, parseNonAccessModifiers} from './basic/Modifier';
+import {JavaAccessModifier, JavaNonAccessModifier} from './basic/Modifier';
 import JavaClassAttribute, {parseAttributes} from './class/Attribute';
 import JavaClassConstructor, {parseConstructors} from './class/Constructor';
 import JavaClassMethod, {parseMethods} from './class/Method';
 import JavaEntry from './Entry';
-import JavaEnum, {parseEnums} from './Enum';
+import JavaEnumConstants, {parseEnumConstants} from './enum/Constants';
 
-export function parseClasses (
-    emitter: any, fieldName: string, receiver: JavaClass[], classJson: JsonArray, currentIndent: number) {
-  classJson.forEach((claz, index) => {
-    if (JsonUtil.isJsonObject(claz)) {
-      receiver.push(new JavaClass(currentIndent, claz));
+export function parseEnums (
+    emitter: any, fieldName: string, receiver: JavaEnum[], enumJson: JsonArray, currentIndent: number) {
+  enumJson.forEach((enumm, index) => {
+    if (JsonUtil.isJsonObject(enumm)) {
+      receiver.push(new JavaEnum(currentIndent, enumm));
     } else {
-      throw J2JError.elementTypeError(emitter, fieldName, index, classJson.length, Object);
+      throw J2JError.elementTypeError(emitter, fieldName, index, enumJson.length, Object);
     }
   });
 }
 
-export default class JavaClass extends JavaEntry {
-  public readonly annotations: JavaAnnotation[] = [];
+const ALLOWED_ENUM_CONSTRUCTOR_ACCESS_MODIFIERS: JavaAccessModifier[] = [ null, 'private' ];
+
+export default class JavaEnum extends JavaEntry {
   public readonly nonAccessModifiers: JavaNonAccessModifier[] = [];
-  public readonly extends: string | null = null;
+  public readonly constants: JavaEnumConstants[] = [];
   public readonly implements: string[] = [];
 
   public readonly attributes: JavaClassAttribute[] = [];
   public readonly constructors: JavaClassConstructor[] = [];
   public readonly methods: JavaClassMethod[] = [];
-  public readonly innerClasses: JavaClass[] = [];
-  public readonly innerEnums: JavaEnum[] = [];
 
   public constructor (currentIndent: number, json: JsonObject) {
     super(currentIndent, json);
-    this.nameWhenAsEmitter = 'Class';
+    this.nameWhenAsEmitter = 'Enum';
 
-    if ('annotations' in json) {
-      if (JsonUtil.isJsonArray(json.annotations)) {
-        parseAnnotations(this, 'annotations', this.annotations, json.annotations, currentIndent);
-      } else {
-        QuickConsole.warnIgnoreField(this, 'annotations', Array);
+    if ('constants' in json) {
+      if (JsonUtil.isJsonArray(json.constants) || JsonUtil.isJsonObject(json.constants)) {
+        parseEnumConstants(this, 'constants', this.constants, json.constants, currentIndent + 1);
       }
-    }
-    if ('nonAccessModifiers' in json) {
-      if (JsonUtil.isJsonArray(json.nonAccessModifiers)) {
-        parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, json.nonAccessModifiers);
-      } else {
-        QuickConsole.warnIgnoreField(this, 'nonAccessModifiers', Array);
-      }
-    }
-    if ('extends' in json) {
-      if (typeof json.extends === 'string') {
-        this.extends = json.extends;
-      } else {
-        QuickConsole.warnIgnoreField(this, 'extends', String);
-      }
+    } else {
+      throw J2JError.fieldNotDefined(this, 'constants');
     }
     if ('implements' in json) {
       if (JsonUtil.isJsonArray(json.implements)) {
@@ -79,6 +63,13 @@ export default class JavaClass extends JavaEntry {
     if ('constructors' in json) {
       if (JsonUtil.isJsonArray(json.constructors)) {
         parseConstructors(this, 'constructors', this.name, this.constructors, json.constructors, currentIndent + 1);
+        this.constructors.forEach((constructor, index) => {
+          if (!ALLOWED_ENUM_CONSTRUCTOR_ACCESS_MODIFIERS.includes(constructor.accessModifier)) {
+            QuickConsole.warnElementType(
+              this, 'constructors', index, this.constructors.length,
+              ALLOWED_ENUM_CONSTRUCTOR_ACCESS_MODIFIERS);
+          }
+        });
       } else {
         QuickConsole.warnIgnoreField(this, 'constructors', Array);
       }
@@ -90,42 +81,23 @@ export default class JavaClass extends JavaEntry {
         QuickConsole.warnIgnoreField(this, 'methods', Array);
       }
     }
-    if ('classes' in json) {
-      QuickConsole.warnDeprecated(this, 'classes', 'innerClasses');
-    }
-    if ('innerClasses' in json) {
-      if (JsonUtil.isJsonArray(json.innerClasses)) {
-        parseClasses(this, 'innerClasses', this.innerClasses, json.innerClasses, currentIndent + 1);
-      } else {
-        QuickConsole.warnIgnoreField(this, 'innerClasses', Array);
-      }
-    }
-    if ('innerEnums' in json) {
-      if (JsonUtil.isJsonArray(json.innerEnums)) {
-        parseEnums(this, 'innerEnums', this.innerEnums, json.innerEnums, currentIndent + 1);
-      } else {
-        QuickConsole.warnIgnoreField(this, 'innerEnums', Array);
-      }
-    }
   }
 
   public toString () {
     return '' +
-      this.annotations.join('') +
-
       `\n${this.currentIndentString}` +
       (this.accessModifier ? `${this.accessModifier} ` : '') +
       this.nonAccessModifiers.join(' ') + (this.nonAccessModifiers.length > 0 ? ' ' : '') +
-      `class ${this.name} ` +
-      (this.extends ? `extends ${this.extends} ` : '') +
+      `enum ${this.name} ` +
       (this.implements.length > 0 ? `implements ${this.implements.join(', ')} ` : '') +
       '{' +
+
+      this.constants.join(',') + ';' +
 
       this.attributes.join('') + (this.attributes.length > 0 ? '\n' : '') +
       this.constructors.join('') + (this.constructors.length > 0 ? '\n' : '') +
       this.methods.join('') + (this.methods.length > 0 ? '\n' : '') +
-      this.innerClasses.join('') + (this.innerClasses.length > 0 ? '\n' : '') +
-      this.innerEnums.join('') + (this.innerEnums.length > 0 ? '\n' : '') +
+
 
       `\n${this.currentIndentString}}`;
   }

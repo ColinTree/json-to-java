@@ -78,7 +78,7 @@
         ]
       }
     ],
-    "classes": [
+    "innerClasses": [
       {
         "name": "InnerClass1",
         "implements": "Interface1"
@@ -86,6 +86,85 @@
       {
         "name": "InnerClass2",
         "implements": [ "Interface1", "Interface2" ]
+      }
+    ],
+    "innerEnums": [
+      {
+        "name": "EnumSample",
+        "implements": [ "Interface1", "Interface2" ],
+        "constants": [
+          "A",
+          {
+            "name": "B",
+            "arguments": [ "arg1", "arg2" ]
+          },
+          { "name": "C" }
+        ],
+        "attributes": [
+          {
+            "accessModifier": "private",
+            "nonAccessModifiers": [ "final", "static" ],
+            "type": "int",
+            "name": "privateIntWithValue",
+            "value": "1"
+          }
+        ],
+        "constructors": [
+          {
+            "statements": [
+              "// constructor with no access modifier"
+            ]
+          },
+          {
+            "accessModifier": "private",
+            "arguments": [
+              { "type": "String", "name": "arg1" },
+              { "type": "int", "name": "arg2" }
+            ],
+            "statements": [ "// constructor with accessModifier & arguments" ]
+          }
+        ],
+        "methods": [
+          {
+            "annotations": [ { "name": "Deprecated" } ],
+            "accessModifier": "public",
+            "nonAccessModifiers": [ "final", "static" ],
+            "type": "boolean",
+            "name": "fullFunctionMethod",
+            "arguments": [
+              { "type": "String", "name": "arg1" },
+              { "type": "String", "name": "arg2" }
+            ],
+            "statements": [
+              "if (arg1.equals(arg2)) {",
+              [ "return true;" ],
+              "} else {",
+              [ "return false;" ],
+              "}"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "EnumInObjectScheme",
+        "constants": {
+          "C1": {
+            "methods": [
+              { "name": "abstractMethod" }
+            ]
+          },
+          "C2": {
+            "methods": [
+              { "name": "abstractMethod" }
+            ]
+          }
+        },
+        "methods": [
+          {
+            "nonAccessModifiers": [ "abstract" ],
+            "name": "abstractMethod"
+          }
+        ]
       }
     ]
   }
