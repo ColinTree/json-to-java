@@ -17,7 +17,7 @@ export function formatExpectations (expectations: Expectations) {
       case Object:  return 'a JsonObject';
       case Number:  return 'a number';
       case Boolean: return 'a boolean value';
-      default:      return expectation as string;
+      default:      return String(expectation);
     }
   });
   switch (expectations.length) {

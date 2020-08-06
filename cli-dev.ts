@@ -43,7 +43,7 @@ if (!fs.existsSync(options.src)) {
 try {
   const result = JsonToJava(String(fs.readFileSync(options.src)));
   fs.writeFileSync(options.output, result);
-  Console.log(null, `Result had already written to ${options.output}`);
+  Console.log(null, `Done.`);
 } catch (e) {
   Console.error(null, e as any);
 }

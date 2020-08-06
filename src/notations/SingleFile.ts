@@ -153,12 +153,9 @@ export default class JavaSingleFile {
   }
 
   private formatFileDescription () {
-    let fileDescription = this.fileDescription;
+    const fileDescription = this.fileDescription;
     if (fileDescription === null) {
       return '';
-    }
-    if (typeof fileDescription === 'string') {
-      fileDescription = [ fileDescription ];
     }
     let rtn = '/**\n';
     if (Array.isArray(fileDescription)) {
