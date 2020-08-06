@@ -1,4 +1,7 @@
 {
+  "fileDescription": {
+    "reference": "https://github.com/ColinTree/json-to-java/blob/master/sample-input-json/FullFunctionDemo.json"
+  },
   "convertOptions": {
     "indent": "tab"
   },
