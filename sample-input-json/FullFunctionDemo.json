@@ -39,7 +39,8 @@
         "accessModifier": "public",
         "nonAccessModifiers": [ "final", "static" ],
         "type": "List<String>",
-        "name": "publicFinalStaticList"
+        "name": "publicFinalStaticList",
+        "value": "null"
       }
     ],
     "constructors": [
