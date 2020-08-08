@@ -1,5 +1,5 @@
 import J2JError from '../../utils/J2JError';
-import { JsonArray, JsonUtil } from '../../utils/json';
+import {JsonArray, JsonUtil} from '../../utils/json';
 import JavaStatementBase from './statements/Base';
 import JavaStatementIf from './statements/If';
 import JavaStatementWhile from './statements/While';
@@ -20,11 +20,11 @@ export function parseJavaStatements (receiver: JavaStatement[], statementJson: J
     } else if (JsonUtil.isJsonObject(statementItem)) {
       switch (statementItem.type) {
         case 'if': {
-          receiver.push(new JavaStatementIf(currentIndent, statementItem));
+          receiver.push(new JavaStatementIf(statementItem, currentIndent));
           break;
         }
         case 'while': {
-          receiver.push(new JavaStatementWhile(currentIndent, statementItem));
+          receiver.push(new JavaStatementWhile(statementItem, currentIndent));
           break;
         }
         default: {
@@ -45,15 +45,15 @@ export function parseJavaStatements (receiver: JavaStatement[], statementJson: J
 export function JavaStatementToString (stmtArr: JavaStatementArray, indenter: (depth: number) => string, depth = 1) {
   let result = '';
   stmtArr.forEach(stmt => {
-    let isStatmentObject = false;
+    let isStatementObject = false;
     if (stmt instanceof JavaStatementBase) {
-      isStatmentObject = true;
+      isStatementObject = true;
       stmt = stmt.toJavaStatement();
     }
     if (typeof stmt === 'string') {
       result += `\n${indenter(depth)}${stmt}`;
     } else {
-      result += JavaStatementToString(stmt, indenter, depth + (isStatmentObject ? 0 : 1));
+      result += JavaStatementToString(stmt, indenter, depth + (isStatementObject ? 0 : 1));
     }
   });
   return result;

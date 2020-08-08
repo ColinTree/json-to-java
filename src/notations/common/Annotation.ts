@@ -1,42 +1,25 @@
-import Lodash, { Dictionary } from 'lodash';
-import J2JError from '../utils/J2JError';
-import { JsonArray, JsonObject, JsonUtil } from '../utils/json';
-import QuickConsole from '../utils/QuickConsole';
-import JavaBaseWithName from './BaseWithName';
+import {Dictionary} from 'lodash';
+import Notation from '../../Notation';
+import J2JError from '../../utils/J2JError';
+import {JsonArray, JsonObject, JsonUtil} from '../../utils/json';
 
 export function parseAnnotations (
     emitter: any, fieldName: string, receiver: JavaAnnotation[], annotationJson: JsonArray, currentIndent: number) {
   annotationJson.forEach((annotation, index) => {
     if (JsonUtil.isJsonObject(annotation)) {
-      receiver.push(new JavaAnnotation(currentIndent, annotation));
+      receiver.push(new JavaAnnotation(annotation, currentIndent));
     } else {
       throw J2JError.elementTypeError(emitter, fieldName, index, annotationJson.length, Object);
     }
   });
 }
 
-export default class JavaAnnotation extends JavaBaseWithName {
-  public readonly values: Dictionary<string> | string | null = null;
+export default class JavaAnnotation extends Notation {
+  private name!: string;
+  private values!: Dictionary<string> | string | null;
 
-  public constructor (currentIndent: number, json: JsonObject) {
-    super(currentIndent, json.name);
-    this.nameWhenAsEmitter = 'Annotation';
-
-    if ('values' in json) {
-      if (typeof json.values === 'string') {
-        this.values = json.values;
-      } else if (JsonUtil.isJsonObject(json.values)) {
-        this.values = Lodash.mapValues(json.values, (value, key) => {
-          if (typeof value !== 'string') {
-            QuickConsole.warnValueTypeOfKey(this, 'values', key, String);
-            return String(value);
-          }
-          return value;
-        });
-      } else {
-        QuickConsole.warnIgnoreField(this, 'values', [ String, Object ]);
-      }
-    }
+  public constructor (json: JsonObject, currentIndent: number) {
+    super(json, currentIndent, 'Annotation');
   }
 
   public toString () {
@@ -45,6 +28,17 @@ export default class JavaAnnotation extends JavaBaseWithName {
       `@${this.name}` +
       this.valuesString();
   }
+
+  protected defineFields () {
+    // name
+    JavaAnnotation.HandleMandatoryName(this);
+
+    // values
+    this.values = null;
+    this.handleStringField('values');
+    this.handleStringObjectField('values');
+  }
+
   private valuesString () {
     if (this.values === null) {
       return '';

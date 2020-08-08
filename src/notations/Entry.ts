@@ -1,21 +1,21 @@
-import J2JError from '../utils/J2JError';
+import Notation from '../Notation';
 import {JsonObject} from '../utils/json';
-import JavaBaseWithName from './BaseWithName';
-import {isJavaAccessModifier, JavaAccessModifier} from './basic/Modifier';
+import {JavaAccessModifier} from './common/Modifier';
 
-export default abstract class JavaEntry extends JavaBaseWithName {
-  public readonly accessModifier: JavaAccessModifier = null;
+export default abstract class JavaEntry extends Notation {
+  public name!: string;
+  public accessModifier!: JavaAccessModifier;
 
-  public constructor (currentIndent: number, json: JsonObject) {
-    super(currentIndent, json.name);
-
-    if ('accessModifier' in json) {
-      if (isJavaAccessModifier(json.accessModifier)) {
-        this.accessModifier = json.accessModifier as JavaAccessModifier;
-      } else {
-        throw J2JError.valueNotAccepted(this, 'accessModifier', json.accessModifier);
-      }
-    }
+  protected constructor (json: JsonObject, currentIndent?: number, nameWhenAsEmitter?: string) {
+    super(json, currentIndent, nameWhenAsEmitter);
   }
 
+  protected defineFields () {
+    // name
+    JavaEntry.HandleMandatoryName(this);
+
+    // accessModifier
+    this.accessModifier = null;
+    JavaEntry.HandleAccessModifier(this);
+  }
 }

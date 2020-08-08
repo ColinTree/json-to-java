@@ -1,5 +1,5 @@
 import J2JError from '../../utils/J2JError';
-import { JsonArray } from '../../utils/json';
+import {JsonArray} from '../../utils/json';
 
 export type JavaAccessModifier = null | 'public' | 'private' | 'protected';
 export type JavaNonAccessModifier = 'static' | 'final' | 'abstract' | 'transient' | 'synchronized' | 'volatile';

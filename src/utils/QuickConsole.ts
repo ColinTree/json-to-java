@@ -82,4 +82,12 @@ export default class QuickConsole {
     Console.warn(emitter, `value of key ${key} in field \'${fieldName}\' ${expectations}`);
   }
 
+  /**
+   * Warn field had been deprecated and what should be used instead
+   */
+  public static warnUnrecognizable (emitter: any, fieldName: string) {
+    Console.warn(emitter,
+      `field '${fieldName}' is not handled since J2J cannot recognize it`);
+  }
+
 }
