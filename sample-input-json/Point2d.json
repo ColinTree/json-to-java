@@ -42,8 +42,11 @@
         "name": "dprint",
         "arguments": [ { "type": "String", "name": "s" } ],
         "statements": [
-          "if (debug)",
-          [ "System.out.println(\"Debug: \" + s);" ]
+          {
+            "type": "if",
+            "condition": "debug",
+            "statements": [ "System.out.println(\"Debug: \" + s);" ]
+          }
         ]
       },
       {
