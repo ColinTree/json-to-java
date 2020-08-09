@@ -38,7 +38,6 @@ export default abstract class Notation {
 
   private readonly deprecatedFields: Map<string, string | undefined>;
   private readonly mandatoryFields: Set<string>;
-  private readonly fieldUnhandledHandlers: Map<string, FieldHandler<any>>;
   private readonly fieldPreprocessors: Map<string, FieldPreprocessor>;
   private readonly fieldAfterCheck: Map<string, FieldAfterChecker>;
   private readonly fields: Map<string, FieldRegistration[]>;
@@ -50,7 +49,6 @@ export default abstract class Notation {
 
     this.deprecatedFields = new Map<string, string | undefined>();
     this.mandatoryFields = new Set<string>();
-    this.fieldUnhandledHandlers = new Map<string, FieldHandler<any>>();
     this.fieldPreprocessors = new Map<string, FieldPreprocessor>();
     this.fieldAfterCheck = new Map<string, FieldAfterChecker>();
     this.fields = new Map<string, FieldRegistration[]>();
@@ -74,9 +72,6 @@ export default abstract class Notation {
   }
   protected registerFieldMandatory (name: string) {
     this.mandatoryFields.add(name);
-  }
-  protected registerOnFieldUnhandled (name: string, handler: FieldHandler<any>) {
-    this.fieldUnhandledHandlers.set(name, handler);
   }
   protected registerFieldPreprocessor (name: string, preprocessor: FieldPreprocessor) {
     this.fieldPreprocessors.set(name, preprocessor);
@@ -233,10 +228,7 @@ export default abstract class Notation {
       });
       // not handled by any handler yet
       if (!handled) {
-        if (this.fieldUnhandledHandlers.has(name)) {
-          (this.fieldUnhandledHandlers.get(name) as FieldHandler<any>)(value, json);
-          handled = true;
-        } else if (this.mandatoryFields.has(name)) {
+        if (this.mandatoryFields.has(name)) {
           throw J2JError.typeError(this, name, Array.from(expectations));
         } else {
           QuickConsole.warnIgnoreField(this, name, Array.from(expectations));
