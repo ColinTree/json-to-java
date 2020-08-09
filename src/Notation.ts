@@ -127,6 +127,12 @@ export default abstract class Notation {
   protected handleEnumField (fieldName: string, acceptedValues: Expectation[]) {
     this.registerEnumField(fieldName, acceptedValues, value => ((this as any)[fieldName] = value));
   }
+  /**
+   * handle a field that input is a JsonArray of strings
+   * @param fieldName
+   * @param acceptAnyway non-string values will be ignored if this is false
+   * @protected
+   */
   protected handleStringArrayField (fieldName: string, acceptAnyway = true) {
     this.registerArrayField(fieldName, theArray => {
       if (!JsonUtil.isJsonArray((this as any)[fieldName])) {
@@ -142,6 +148,13 @@ export default abstract class Notation {
       });
     });
   }
+  /**
+   * handle a field that input is a JsonArray of accepted values
+   * @param fieldName
+   * @param acceptedValues
+   * @protected
+   * @throws J2JError when any of array value is not accepted
+   */
   protected handleEnumArrayField (fieldName: string, acceptedValues: any[]) {
     this.registerArrayField(fieldName, theArray => {
       if (!JsonUtil.isJsonArray((this as any)[fieldName])) {
@@ -155,10 +168,21 @@ export default abstract class Notation {
       });
     });
   }
+  /**
+   * handle a field that input is a JsonArray of objects
+   *   (use provided constructor to create new field instance)
+   * @param fieldName
+   * @param constructor
+   * @param indent used to construct instant
+   * @protected
+   */
   // TODO: really use any for type of constructor?
   protected handleObjectArrayField (fieldName: string, constructor: any, indent = this.currentIndent) {
     this.registerArrayField(fieldName, theArray => {
       theArray.forEach((data, index) => {
+        if (!JsonUtil.isJsonArray((this as any)[fieldName])) {
+          (this as any)[fieldName] = [];
+        }
         if (JsonUtil.isJsonObject(data)) {
           (this as any)[fieldName].push(new constructor(data, indent));
         } else {
@@ -167,6 +191,12 @@ export default abstract class Notation {
       });
     });
   }
+  /**
+   * handle a field that input is a JsonObject of string-string pairs
+   * @param fieldName
+   * @param acceptAnyway non-string values will be ignored if this is false
+   * @protected
+   */
   protected handleStringObjectField (fieldName: string, acceptAnyway = true) {
     this.registerObjectField(fieldName, theObject => {
       if (!JsonUtil.isJsonObject((this as any)[fieldName])) {
