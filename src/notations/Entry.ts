@@ -1,6 +1,6 @@
 import Notation from '../Notation';
 import {JsonObject} from '../utils/json';
-import {JavaAccessModifier} from './common/Modifier';
+import {JavaAccessModifier, JavaAccessModifiers} from './common/Modifier';
 
 export default abstract class JavaEntry extends Notation {
   public name!: string;
@@ -16,6 +16,6 @@ export default abstract class JavaEntry extends Notation {
 
     // accessModifier
     this.accessModifier = null;
-    JavaEntry.HandleAccessModifier(this);
+    this.handleEnumField('accessModifier', JavaAccessModifiers);
   }
 }

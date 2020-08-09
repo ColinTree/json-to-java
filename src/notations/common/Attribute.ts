@@ -1,18 +1,6 @@
 import Notation from '../../Notation';
-import J2JError from '../../utils/J2JError';
-import {JsonArray, JsonObject, JsonUtil} from '../../utils/json';
-import {JavaAccessModifier, JavaNonAccessModifier, parseNonAccessModifiers} from './Modifier';
-
-export function parseAttributes (
-    emitter: any, fieldName: string, receiver: JavaAttribute[], attributeJson: JsonArray, currentIndent: number) {
-  attributeJson.forEach((attribute, index) => {
-    if (JsonUtil.isJsonObject(attribute)) {
-      receiver.push(new JavaAttribute(attribute, currentIndent));
-    } else {
-      throw J2JError.elementTypeError(emitter, fieldName, index, attributeJson.length, Object);
-    }
-  });
-}
+import {JsonObject} from '../../utils/json';
+import {JavaAccessModifier, JavaAccessModifiers, JavaNonAccessModifier, JavaNonAccessModifiers} from './Modifier';
 
 export default class JavaAttribute extends Notation {
   private name!: string;
@@ -42,12 +30,11 @@ export default class JavaAttribute extends Notation {
 
     // accessModifier
     this.accessModifier = null;
-    JavaAttribute.HandleAccessModifier(this);
+    this.handleEnumField('accessModifier', JavaAccessModifiers);
 
     // nonAccessModifiers
     this.nonAccessModifiers = [];
-    this.registerArrayField('nonAccessModifiers', value =>
-      parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, value));
+    this.handleEnumArrayField('nonAccessModifiers', JavaNonAccessModifiers);
 
     // type
     this.registerFieldMandatory('type');

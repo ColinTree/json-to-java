@@ -1,21 +1,8 @@
 import Notation from '../../Notation';
-import J2JError from '../../utils/J2JError';
-import {JsonArray, JsonObject, JsonUtil} from '../../utils/json';
-import {JavaAccessModifier} from './Modifier';
+import {JsonObject} from '../../utils/json';
+import {JavaAccessModifier, JavaAccessModifiers} from './Modifier';
 import {JavaStatementArray, JavaStatementToString, parseJavaStatements} from './Statement';
-import JavaVariableDefinition, {parseVariableDefinitions} from './VariableDefinition';
-
-export function parseConstructors (
-    emitter: any, fieldName: string, className: string, receiver: JavaConstructor[],
-    constructorJson: JsonArray, currentIndent: number) {
-  constructorJson.forEach((constructor, index) => {
-    if (JsonUtil.isJsonObject(constructor)) {
-      receiver.push(new JavaConstructor(constructor, currentIndent, className));
-    } else {
-      throw J2JError.elementTypeError(emitter, fieldName, index, constructorJson.length, Object);
-    }
-  });
-}
+import JavaVariableDefinition from './VariableDefinition';
 
 export default class JavaConstructor extends Notation {
   public accessModifier!: JavaAccessModifier;
@@ -43,12 +30,11 @@ export default class JavaConstructor extends Notation {
   protected defineFields () {
     // accessModifier
     this.accessModifier = null;
-    JavaConstructor.HandleAccessModifier(this);
+    this.handleEnumField('accessModifier', JavaAccessModifiers);
 
     // arguments
     this.arguments = [];
-    this.registerArrayField('arguments', value =>
-      parseVariableDefinitions(this, 'arguments', this.arguments, value, this.currentIndent));
+    this.handleObjectArrayField('arguments', JavaVariableDefinition);
 
     // statements
     this.statements = [];

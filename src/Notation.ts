@@ -1,5 +1,4 @@
 import Lodash from 'lodash';
-import {isJavaAccessModifier} from './notations/common/Modifier';
 import {globalConvertOptions} from './utils/ConvertOptions';
 import J2JError from './utils/J2JError';
 import {JsonArray, JsonObject, JsonUtil} from './utils/json';
@@ -8,6 +7,7 @@ import QuickConsole, {Expectation, Expectations} from './utils/QuickConsole';
 type FieldValidator<T> = (value: any) => boolean;
 type FieldHandler<T> = (value: T, json: JsonObject) => void;
 type FieldPreprocessor = (value: any) => any;
+type FieldAfterChecker = () => void;
 
 export interface FieldRegistration {
   type: Expectations;
@@ -31,13 +31,6 @@ export default abstract class Notation {
     });
     receiver.handleStringField('name');
   }
-  public static HandleAccessModifier (receiver: Notation) {
-    receiver.registerField('accessModifier', String, isJavaAccessModifier,
-      value => ((receiver as any).accessModifier = value));
-    receiver.registerOnFieldUnhandled('accessModifier', value => {
-      throw J2JError.valueNotAccepted(receiver, 'accessModifier', value);
-    });
-  }
 
   public readonly nameWhenAsEmitter: string;
   public readonly currentIndent: number;
@@ -47,6 +40,7 @@ export default abstract class Notation {
   private readonly mandatoryFields: Set<string>;
   private readonly fieldUnhandledHandlers: Map<string, FieldHandler<any>>;
   private readonly fieldPreprocessors: Map<string, FieldPreprocessor>;
+  private readonly fieldAfterCheck: Map<string, FieldAfterChecker>;
   private readonly fields: Map<string, FieldRegistration[]>;
 
   protected constructor (json: JsonObject, currentIndent?: number, nameWhenAsEmitter?: string) {
@@ -58,6 +52,7 @@ export default abstract class Notation {
     this.mandatoryFields = new Set<string>();
     this.fieldUnhandledHandlers = new Map<string, FieldHandler<any>>();
     this.fieldPreprocessors = new Map<string, FieldPreprocessor>();
+    this.fieldAfterCheck = new Map<string, FieldAfterChecker>();
     this.fields = new Map<string, FieldRegistration[]>();
 
     this.defineFields();
@@ -85,6 +80,9 @@ export default abstract class Notation {
   }
   protected registerFieldPreprocessor (name: string, preprocessor: FieldPreprocessor) {
     this.fieldPreprocessors.set(name, preprocessor);
+  }
+  protected registerFieldAfterCheck (name: string, checker: FieldAfterChecker) {
+    this.fieldAfterCheck.set(name, checker);
   }
 
   // ---------------------------------
@@ -149,7 +147,32 @@ export default abstract class Notation {
       });
     });
   }
-  protected handleStringObjectField (fieldName: string, acceptAnyway: boolean = true) {
+  protected handleEnumArrayField (fieldName: string, acceptedValues: any[]) {
+    this.registerArrayField(fieldName, theArray => {
+      if (!JsonUtil.isJsonArray((this as any)[fieldName])) {
+        (this as any)[fieldName] = [];
+      }
+      theArray.forEach(value => {
+        if (!acceptedValues.includes(value)) {
+          throw J2JError.valueNotAccepted(this, fieldName, value);
+        }
+        (this as any)[fieldName].push(value);
+      });
+    });
+  }
+  // TODO: really use any for type of constructor?
+  protected handleObjectArrayField (fieldName: string, constructor: any, indent = this.currentIndent) {
+    this.registerArrayField(fieldName, theArray => {
+      theArray.forEach((data, index) => {
+        if (JsonUtil.isJsonObject(data)) {
+          (this as any)[fieldName].push(new constructor(data, indent));
+        } else {
+          throw J2JError.elementTypeError(this, fieldName, index, theArray.length, Object);
+        }
+      });
+    });
+  }
+  protected handleStringObjectField (fieldName: string, acceptAnyway = true) {
     this.registerObjectField(fieldName, theObject => {
       if (!JsonUtil.isJsonObject((this as any)[fieldName])) {
         (this as any)[fieldName] = {};
@@ -212,11 +235,15 @@ export default abstract class Notation {
       if (!handled) {
         if (this.fieldUnhandledHandlers.has(name)) {
           (this.fieldUnhandledHandlers.get(name) as FieldHandler<any>)(value, json);
+          handled = true;
         } else if (this.mandatoryFields.has(name)) {
           throw J2JError.typeError(this, name, Array.from(expectations));
         } else {
           QuickConsole.warnIgnoreField(this, name, Array.from(expectations));
         }
+      }
+      if (handled && this.fieldAfterCheck.has(name)) {
+        (this.fieldAfterCheck.get(name) as FieldAfterChecker)();
       }
     });
     // fields that have no registration

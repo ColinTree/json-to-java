@@ -1,18 +1,6 @@
 import {Dictionary} from 'lodash';
 import Notation from '../../Notation';
-import J2JError from '../../utils/J2JError';
-import {JsonArray, JsonObject, JsonUtil} from '../../utils/json';
-
-export function parseAnnotations (
-    emitter: any, fieldName: string, receiver: JavaAnnotation[], annotationJson: JsonArray, currentIndent: number) {
-  annotationJson.forEach((annotation, index) => {
-    if (JsonUtil.isJsonObject(annotation)) {
-      receiver.push(new JavaAnnotation(annotation, currentIndent));
-    } else {
-      throw J2JError.elementTypeError(emitter, fieldName, index, annotationJson.length, Object);
-    }
-  });
-}
+import {JsonObject} from '../../utils/json';
 
 export default class JavaAnnotation extends Notation {
   private name!: string;

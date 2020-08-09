@@ -1,23 +1,11 @@
-import J2JError from '../../utils/J2JError';
-import {JsonArray, JsonObject, JsonUtil} from '../../utils/json';
+import {JsonObject, JsonUtil} from '../../utils/json';
 import QuickConsole from '../../utils/QuickConsole';
-import JavaAttribute, {parseAttributes} from '../common/Attribute';
-import JavaConstructor, {parseConstructors} from '../common/Constructor';
-import JavaMethod, {parseMethods} from '../common/Method';
-import {JavaAccessModifier, JavaNonAccessModifier, parseNonAccessModifiers} from '../common/Modifier';
+import JavaAttribute from '../common/Attribute';
+import JavaConstructor from '../common/Constructor';
+import JavaMethod from '../common/Method';
+import {JavaAccessModifier, JavaNonAccessModifier, JavaNonAccessModifiers} from '../common/Modifier';
 import JavaEntry from '../Entry';
 import JavaEnumConstants, {parseEnumConstants} from './enum/Constants';
-
-export function parseEnums (
-    emitter: any, fieldName: string, receiver: JavaEnum[], enumJson: JsonArray, currentIndent: number) {
-  enumJson.forEach((en, index) => {
-    if (JsonUtil.isJsonObject(en)) {
-      receiver.push(new JavaEnum(en, currentIndent));
-    } else {
-      throw J2JError.elementTypeError(emitter, fieldName, index, enumJson.length, Object);
-    }
-  });
-}
 
 const ALLOWED_ENUM_CONSTRUCTOR_ACCESS_MODIFIERS: JavaAccessModifier[] = [ null, 'private' ];
 
@@ -57,8 +45,7 @@ export default class JavaEnum extends JavaEntry {
 
     // nonAccessModifiers
     this.nonAccessModifiers = [];
-    this.registerArrayField('nonAccessModifiers', value =>
-      parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, value));
+    this.handleEnumArrayField('nonAccessModifiers', JavaNonAccessModifiers);
 
     // constants
     this.constants = [];
@@ -77,13 +64,12 @@ export default class JavaEnum extends JavaEntry {
 
     // attributes
     this.attributes = [];
-    this.registerArrayField('attributes', value =>
-      parseAttributes(this, 'attributes', this.attributes, value, this.currentIndent + 1));
+    this.handleObjectArrayField('attributes', JavaAttribute, this.currentIndent + 1);
 
     // constructors
     this.constructors = [];
-    this.registerArrayField('constructors', value => {
-      parseConstructors(this, 'constructors', this.name, this.constructors, value, this.currentIndent + 1);
+    this.handleObjectArrayField('constructors', JavaConstructor, this.currentIndent + 1);
+    this.registerFieldAfterCheck('constructors', () => {
       this.constructors.forEach((constructor, index) => {
         if (!ALLOWED_ENUM_CONSTRUCTOR_ACCESS_MODIFIERS.includes(constructor.accessModifier)) {
           QuickConsole.warnElementType(
@@ -95,7 +81,6 @@ export default class JavaEnum extends JavaEntry {
 
     // methods
     this.methods = [];
-    this.registerArrayField('methods', value =>
-      parseMethods(this, 'methods', this.methods, value, this.currentIndent + 1));
+    this.handleObjectArrayField('methods', JavaMethod, this.currentIndent + 1);
   }
 }

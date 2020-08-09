@@ -1,23 +1,11 @@
-import J2JError from '../../utils/J2JError';
-import {JsonArray, JsonObject, JsonUtil} from '../../utils/json';
-import JavaAnnotation, {parseAnnotations} from '../common/Annotation';
-import JavaAttribute, {parseAttributes} from '../common/Attribute';
-import JavaConstructor, {parseConstructors} from '../common/Constructor';
-import JavaMethod, {parseMethods} from '../common/Method';
-import {JavaNonAccessModifier, parseNonAccessModifiers} from '../common/Modifier';
+import {JsonObject, JsonUtil} from '../../utils/json';
+import JavaAnnotation from '../common/Annotation';
+import JavaAttribute from '../common/Attribute';
+import JavaConstructor from '../common/Constructor';
+import JavaMethod from '../common/Method';
+import {JavaNonAccessModifier, JavaNonAccessModifiers} from '../common/Modifier';
 import JavaEntry from '../Entry';
-import JavaEnum, {parseEnums} from './Enum';
-
-export function parseClasses (
-    emitter: any, fieldName: string, receiver: JavaClass[], classJson: JsonArray, currentIndent: number) {
-  classJson.forEach((clazz, index) => {
-    if (JsonUtil.isJsonObject(clazz)) {
-      receiver.push(new JavaClass(clazz, currentIndent));
-    } else {
-      throw J2JError.elementTypeError(emitter, fieldName, index, classJson.length, Object);
-    }
-  });
-}
+import JavaEnum from './Enum';
 
 export default class JavaClass extends JavaEntry {
   private annotations!: JavaAnnotation[];
@@ -60,13 +48,11 @@ export default class JavaClass extends JavaEntry {
 
     // annotations
     this.annotations = [];
-    this.registerArrayField('annotations', value =>
-      parseAnnotations(this, 'annotations', this.annotations, value, this.currentIndent));
+    this.handleObjectArrayField('annotations', JavaAnnotation);
 
     // nonAccessModifiers
     this.nonAccessModifiers = [];
-    this.registerArrayField('nonAccessModifiers', value =>
-      parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, value));
+    this.handleEnumArrayField('nonAccessModifiers', JavaNonAccessModifiers);
 
     // extends
     this.extends = null;
@@ -81,30 +67,25 @@ export default class JavaClass extends JavaEntry {
 
     // attributes
     this.attributes = [];
-    this.registerArrayField('attributes', value =>
-      parseAttributes(this, 'attributes', this.attributes, value, this.currentIndent + 1));
+    this.handleObjectArrayField('attributes', JavaAttribute, this.currentIndent + 1);
 
     // constructors
     this.constructors = [];
-    this.registerArrayField('constructors', value =>
-      parseConstructors(this, 'constructors', this.name, this.constructors, value, this.currentIndent + 1));
+    this.handleObjectArrayField('constructors', JavaConstructor, this.currentIndent + 1);
 
     // methods
     this.methods = [];
-    this.registerArrayField('methods', value =>
-      parseMethods(this, 'methods', this.methods, value, this.currentIndent + 1));
+    this.handleObjectArrayField('methods', JavaMethod, this.currentIndent + 1);
 
     // classes
     this.registerFieldDeprecated('classes', 'innerClasses');
 
     // innerClasses
     this.innerClasses = [];
-    this.registerArrayField('innerClasses', value =>
-      parseClasses(this, 'innerClasses', this.innerClasses, value, this.currentIndent + 1));
+    this.handleObjectArrayField('innerClasses', JavaClass, this.currentIndent + 1);
 
     // innerEnums
     this.innerEnums = [];
-    this.registerArrayField('innerEnums', value =>
-      parseEnums(this, 'innerEnums', this.innerEnums, value, this.currentIndent + 1));
+    this.handleObjectArrayField('innerEnums', JavaEnum, this.currentIndent + 1);
   }
 }

@@ -1,21 +1,9 @@
 import Notation from '../../Notation';
-import J2JError from '../../utils/J2JError';
-import {JsonArray, JsonObject, JsonUtil} from '../../utils/json';
-import JavaAnnotation, {parseAnnotations} from './Annotation';
-import {JavaAccessModifier, JavaNonAccessModifier, parseNonAccessModifiers} from './Modifier';
+import {JsonObject} from '../../utils/json';
+import JavaAnnotation from './Annotation';
+import {JavaAccessModifier, JavaAccessModifiers, JavaNonAccessModifier, JavaNonAccessModifiers} from './Modifier';
 import {JavaStatementArray, JavaStatementToString, parseJavaStatements} from './Statement';
-import JavaVariableDefinition, {parseVariableDefinitions} from './VariableDefinition';
-
-export function parseMethods (
-    emitter: any, fieldName: string, receiver: JavaMethod[], methodJson: JsonArray, currentIndent: number) {
-  methodJson.forEach((method, index) => {
-    if (JsonUtil.isJsonObject(method)) {
-      receiver.push(new JavaMethod(method, currentIndent));
-    } else {
-      throw J2JError.elementTypeError(emitter, fieldName, index, methodJson.length, Object);
-    }
-  });
-}
+import JavaVariableDefinition from './VariableDefinition';
 
 export default class JavaMethod extends Notation {
   private name!: string;
@@ -52,17 +40,15 @@ export default class JavaMethod extends Notation {
 
     // annotations
     this.annotations = [];
-    this.registerArrayField('annotations', value =>
-      parseAnnotations(this, 'annotations', this.annotations, value, this.currentIndent));
+    this.handleObjectArrayField('annotations', JavaAnnotation);
 
     // accessModifier
     this.accessModifier = null;
-    JavaMethod.HandleAccessModifier(this);
+    this.handleEnumField('accessModifier', JavaAccessModifiers);
 
     // nonAccessModifiers
     this.nonAccessModifiers = [];
-    this.registerArrayField('nonAccessModifiers', value =>
-      parseNonAccessModifiers(this, 'nonAccessModifiers', this.nonAccessModifiers, value));
+    this.handleEnumArrayField('nonAccessModifiers', JavaNonAccessModifiers);
 
     // type
     this.type = 'void';
@@ -70,8 +56,7 @@ export default class JavaMethod extends Notation {
 
     // arguments
     this.arguments = [];
-    this.registerArrayField('arguments', value =>
-      parseVariableDefinitions(this, 'arguments', this.arguments, value, this.currentIndent));
+    this.handleObjectArrayField('arguments', JavaVariableDefinition);
 
     // statements
     this.statements = [];

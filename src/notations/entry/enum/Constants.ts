@@ -3,7 +3,7 @@ import Notation from '../../../Notation';
 import J2JError from '../../../utils/J2JError';
 import {JsonArray, JsonObject, JsonUtil} from '../../../utils/json';
 import QuickConsole from '../../../utils/QuickConsole';
-import JavaMethod, {parseMethods} from '../../common/Method';
+import JavaMethod from '../../common/Method';
 
 export function parseEnumConstants (emitter: any, fieldName: string,
                                     receiver: JavaEnumConstants[],
@@ -64,7 +64,6 @@ export default class JavaEnumConstants extends Notation {
 
     // methods
     this.methods = [];
-    this.registerArrayField('methods', value =>
-      parseMethods(this, 'methods', this.methods, value, this.currentIndent + 1));
+    this.handleObjectArrayField('methods', JavaMethod, this.currentIndent + 1);
   }
 }

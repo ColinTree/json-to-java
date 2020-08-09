@@ -1,18 +1,5 @@
 import Notation from '../../Notation';
-import J2JError from '../../utils/J2JError';
-import {JsonArray, JsonObject, JsonUtil} from '../../utils/json';
-
-export function parseVariableDefinitions (
-  emitter: any, fieldName: string, receiver: JavaVariableDefinition[], argumentJson: JsonArray,
-  currentIndent: number) {
-  argumentJson.forEach((argument, index) => {
-    if (JsonUtil.isJsonObject(argument)) {
-      receiver.push(new JavaVariableDefinition(argument, currentIndent));
-    } else {
-      throw J2JError.elementTypeError(emitter, fieldName, index, length, Object);
-    }
-  });
-}
+import {JsonObject} from '../../utils/json';
 
 export default class JavaVariableDefinition extends Notation {
   private name!: string;
