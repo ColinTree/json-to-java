@@ -131,7 +131,10 @@ export default abstract class Notation {
   protected handleStringField (fieldName: string) {
     this.registerStringField(fieldName, value => ((this as any)[fieldName] = value));
   }
-  protected handleStringArrayField (fieldName: string, acceptAnyway: boolean = true) {
+  protected handleEnumField (fieldName: string, acceptedValues: Expectation[]) {
+    this.registerEnumField(fieldName, acceptedValues, value => ((this as any)[fieldName] = value));
+  }
+  protected handleStringArrayField (fieldName: string, acceptAnyway = true) {
     this.registerArrayField(fieldName, theArray => {
       if (!JsonUtil.isJsonArray((this as any)[fieldName])) {
         (this as any)[fieldName] = [];

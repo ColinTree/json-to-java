@@ -100,9 +100,7 @@ export default class JavaSingleFile extends Notation {
 
     // entryType
     this.entryType = 'class';
-    this.registerEnumField('entryType', ACCEPTED_ENTRY_TYPES, value => {
-      this.entryType = value;
-    });
+    this.handleEnumField('entryType', ACCEPTED_ENTRY_TYPES);
 
     // entry
     this.registerFieldMandatory('entry');
