@@ -1,5 +1,6 @@
 import Lodash from 'lodash';
 import {globalConvertOptions} from './utils/ConvertOptions';
+import DefaultMap from './utils/DefaultMap';
 import J2JError from './utils/J2JError';
 import {JsonArray, JsonObject, JsonUtil} from './utils/json';
 import QuickConsole, {Expectation, Expectations} from './utils/QuickConsole';
@@ -16,8 +17,17 @@ export interface FieldRegistration {
   expectations?: Expectations;
 }
 
+class FieldInfo {
+  public mandatory = false;
+  public deprecated?: string | null;
+  public preprocessor?: FieldPreprocessor;
+  public afterChecker?: FieldAfterChecker;
+  public registrations: FieldRegistration[] = [];
+}
+
 const JAVA_NAME_VALIDATOR = /^[a-zA-Z_][a-zA-Z0-9_]*$/i;
 
+// tslint:disable-next-line:max-classes-per-file
 export default abstract class Notation {
 
   // Handle some specified fields
@@ -36,22 +46,14 @@ export default abstract class Notation {
   public readonly currentIndent: number;
   public readonly currentIndentString: string;
 
-  private readonly deprecatedFields: Map<string, string | undefined>;
-  private readonly mandatoryFields: Set<string>;
-  private readonly fieldPreprocessors: Map<string, FieldPreprocessor>;
-  private readonly fieldAfterCheck: Map<string, FieldAfterChecker>;
-  private readonly fields: Map<string, FieldRegistration[]>;
+  private readonly fields: DefaultMap<string, FieldInfo>;
 
   protected constructor (json: JsonObject, currentIndent?: number, nameWhenAsEmitter?: string) {
     this.nameWhenAsEmitter = nameWhenAsEmitter === undefined ? this.constructor.name : nameWhenAsEmitter;
     this.currentIndent = currentIndent === undefined ? 0 : currentIndent;
     this.currentIndentString = globalConvertOptions.indent.repeat(this.currentIndent);
 
-    this.deprecatedFields = new Map<string, string | undefined>();
-    this.mandatoryFields = new Set<string>();
-    this.fieldPreprocessors = new Map<string, FieldPreprocessor>();
-    this.fieldAfterCheck = new Map<string, FieldAfterChecker>();
-    this.fields = new Map<string, FieldRegistration[]>();
+    this.fields = new DefaultMap<string, FieldInfo>(FieldInfo);
 
     this.defineFields();
     this.loadJson(json);
@@ -68,16 +70,16 @@ export default abstract class Notation {
   // ---------------------------
 
   protected registerFieldDeprecated (name: string, replacement?: string) {
-    this.deprecatedFields.set(name, replacement);
+    this.fields.get(name).deprecated = replacement === undefined ? null : replacement;
   }
   protected registerFieldMandatory (name: string) {
-    this.mandatoryFields.add(name);
+    this.fields.get(name).mandatory = true;
   }
   protected registerFieldPreprocessor (name: string, preprocessor: FieldPreprocessor) {
-    this.fieldPreprocessors.set(name, preprocessor);
+    this.fields.get(name).preprocessor = preprocessor;
   }
   protected registerFieldAfterCheck (name: string, checker: FieldAfterChecker) {
-    this.fieldAfterCheck.set(name, checker);
+    this.fields.get(name).afterChecker = checker;
   }
 
   // ---------------------------------
@@ -86,11 +88,7 @@ export default abstract class Notation {
 
   protected registerField (name: string, type: Expectations, validator: FieldValidator<any>,
                            handler: FieldHandler<any>, expectations?: Expectations) {
-    let regs = this.fields.get(name);
-    if (regs === undefined) {
-      this.fields.set(name, regs = new Array<FieldRegistration>());
-    }
-    regs.push({ type, validator, handler, expectations });
+    this.fields.get(name).registrations.push({ type, validator, handler, expectations });
   }
   protected registerBooleanField (name: string, handler: (value: boolean, json: JsonObject) => void) {
     this.registerField(name, Boolean, v => typeof v === 'boolean', handler);
@@ -221,18 +219,18 @@ export default abstract class Notation {
    * json loader (using handlers registered)
    */
   private loadJson (json: JsonObject) {
-    this.fields.forEach((registrations, name) => {
+    this.fields.forEach((fieldInfo, name) => {
       // if such field exists in json
       if (!(name in json)) {
-        if (this.mandatoryFields.has(name)) {
+        if (fieldInfo.mandatory) {
           throw J2JError.fieldNotDefined(this, name);
         }
         return;
       }
       // check if deprecated/removed
-      if (this.deprecatedFields.has(name)) {
-        const replacement = this.deprecatedFields.get(name);
-        if (replacement === undefined) {
+      if (fieldInfo.deprecated !== undefined) {
+        const replacement = fieldInfo.deprecated;
+        if (replacement === null) {
           QuickConsole.warnRemoved(this, name);
         } else {
           QuickConsole.warnDeprecated(this, name, replacement);
@@ -241,13 +239,12 @@ export default abstract class Notation {
       let handled = false;
       let value = json[name];
       // preprocess
-      const preprocessor = this.fieldPreprocessors.get(name);
-      if (preprocessor !== undefined) {
-        value = preprocessor(value);
+      if (fieldInfo.preprocessor !== undefined) {
+        value = fieldInfo.preprocessor(value);
       }
       // go through all registrations
       const expectations = new Set<Expectation>();
-      registrations.forEach(reg => {
+      fieldInfo.registrations.forEach(reg => {
         if (reg.validator(value)) {
           reg.handler(value, json);
           handled = true;
@@ -262,14 +259,14 @@ export default abstract class Notation {
       });
       // not handled by any handler yet
       if (!handled) {
-        if (this.mandatoryFields.has(name)) {
+        if (fieldInfo.mandatory) {
           throw J2JError.typeError(this, name, Array.from(expectations));
         } else {
           QuickConsole.warnIgnoreField(this, name, Array.from(expectations));
         }
       }
-      if (handled && this.fieldAfterCheck.has(name)) {
-        (this.fieldAfterCheck.get(name) as FieldAfterChecker)();
+      if (handled && fieldInfo.afterChecker !== undefined) {
+        fieldInfo.afterChecker();
       }
     });
     // fields that have no registration
