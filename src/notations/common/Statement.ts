@@ -18,13 +18,15 @@ export function parseJavaStatements (receiver: JavaStatement[], statementJson: J
       parseJavaStatements(subReceiver, statementItem, currentIndent + 1);
       receiver.push(subReceiver);
     } else if (JsonUtil.isJsonObject(statementItem)) {
-      switch (statementItem.type) {
-        case 'if': {
-          receiver.push(new JavaStatementIf(statementItem, currentIndent));
-          break;
-        }
+      const stmtConstructors = {
+        if: JavaStatementIf,
+        while: JavaStatementWhile,
+      };
+      const stmtType = statementItem.type;
+      switch (stmtType) {
+        case 'if':
         case 'while': {
-          receiver.push(new JavaStatementWhile(statementItem, currentIndent));
+          receiver.push(new (stmtConstructors[stmtType])(statementItem, currentIndent));
           break;
         }
         default: {
