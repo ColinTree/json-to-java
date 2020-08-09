@@ -64,6 +64,6 @@ export default class JavaEnumConstants extends Notation {
 
     // methods
     this.methods = [];
-    this.handleObjectArrayField('methods', JavaMethod, this.currentIndent + 1);
+    this.handleObjectArrayField('methods', JavaMethod, () => [this.currentIndent + 1]);
   }
 }

@@ -173,18 +173,22 @@ export default abstract class Notation {
    *   (use provided constructor to create new field instance)
    * @param fieldName
    * @param constructor
-   * @param indent used to construct instant
+   * @param parameterProvider
    * @protected
    */
   // TODO: really use any for type of constructor?
-  protected handleObjectArrayField (fieldName: string, constructor: any, indent = this.currentIndent) {
+  protected handleObjectArrayField (
+    fieldName: string,
+    constructor: any,
+    parameterProvider: (value: JsonObject) => any[] = () => [ this.currentIndent ],
+  ) {
     this.registerArrayField(fieldName, theArray => {
       theArray.forEach((data, index) => {
         if (!JsonUtil.isJsonArray((this as any)[fieldName])) {
           (this as any)[fieldName] = [];
         }
         if (JsonUtil.isJsonObject(data)) {
-          (this as any)[fieldName].push(new constructor(data, indent));
+          (this as any)[fieldName].push(new constructor(data, ...parameterProvider(data)));
         } else {
           throw J2JError.elementTypeError(this, fieldName, index, theArray.length, Object);
         }

@@ -67,25 +67,25 @@ export default class JavaClass extends JavaEntry {
 
     // attributes
     this.attributes = [];
-    this.handleObjectArrayField('attributes', JavaAttribute, this.currentIndent + 1);
+    this.handleObjectArrayField('attributes', JavaAttribute, () => [this.currentIndent + 1]);
 
     // constructors
     this.constructors = [];
-    this.handleObjectArrayField('constructors', JavaConstructor, this.currentIndent + 1);
+    this.handleObjectArrayField('constructors', JavaConstructor, () => [this.currentIndent + 1, this.name]);
 
     // methods
     this.methods = [];
-    this.handleObjectArrayField('methods', JavaMethod, this.currentIndent + 1);
+    this.handleObjectArrayField('methods', JavaMethod, () => [this.currentIndent + 1]);
 
     // classes
     this.registerFieldDeprecated('classes', 'innerClasses');
 
     // innerClasses
     this.innerClasses = [];
-    this.handleObjectArrayField('innerClasses', JavaClass, this.currentIndent + 1);
+    this.handleObjectArrayField('innerClasses', JavaClass, () => [this.currentIndent + 1]);
 
     // innerEnums
     this.innerEnums = [];
-    this.handleObjectArrayField('innerEnums', JavaEnum, this.currentIndent + 1);
+    this.handleObjectArrayField('innerEnums', JavaEnum, () => [this.currentIndent + 1]);
   }
 }

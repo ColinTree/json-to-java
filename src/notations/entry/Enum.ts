@@ -64,11 +64,11 @@ export default class JavaEnum extends JavaEntry {
 
     // attributes
     this.attributes = [];
-    this.handleObjectArrayField('attributes', JavaAttribute, this.currentIndent + 1);
+    this.handleObjectArrayField('attributes', JavaAttribute, () => [this.currentIndent + 1]);
 
     // constructors
     this.constructors = [];
-    this.handleObjectArrayField('constructors', JavaConstructor, this.currentIndent + 1);
+    this.handleObjectArrayField('constructors', JavaConstructor, () => [this.currentIndent + 1, this.name]);
     this.registerFieldAfterCheck('constructors', () => {
       this.constructors.forEach((constructor, index) => {
         if (!ALLOWED_ENUM_CONSTRUCTOR_ACCESS_MODIFIERS.includes(constructor.accessModifier)) {
@@ -81,6 +81,6 @@ export default class JavaEnum extends JavaEntry {
 
     // methods
     this.methods = [];
-    this.handleObjectArrayField('methods', JavaMethod, this.currentIndent + 1);
+    this.handleObjectArrayField('methods', JavaMethod, () => [this.currentIndent + 1]);
   }
 }
