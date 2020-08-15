@@ -22,7 +22,7 @@ export function formatExpectations (expectations: Expectations) {
   });
   switch (expectations.length) {
     case 0:
-      throw new J2JError(null, 'QuickConsole.expectationFormatter arguemnt expectation is an empty array');
+      throw new J2JError(null, 'QuickConsole.expectationFormatter argument expectation is an empty array');
     case 1:
       return `is not ${expectations[0]}`;
     case 2:
